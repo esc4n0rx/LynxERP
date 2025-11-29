@@ -1,0 +1,457 @@
+{
+  "info": {
+    "title": "Configuração de Empresa API",
+    "description": "Gestão completa dos dados da empresa no sistema",
+    "version": "1.0.0",
+    "route_prefix": "/configuracoes/empresa"
+  },
+  "routes": [
+    {
+      "path": "/configuracoes/empresa",
+      "method": "POST",
+      "summary": "Criar empresa",
+      "description": "Cria uma nova empresa no sistema.",
+      "permissions": ["master", "admin"],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "nome_empresa",
+                "cnpj_cpf",
+                "cep",
+                "rua",
+                "numero",
+                "bairro",
+                "cidade",
+                "uf",
+                "centro",
+                "warehouse_number"
+              ],
+              "properties": {
+                "nome_empresa": {
+                  "type": "string",
+                  "minLength": 3,
+                  "maxLength": 255
+                },
+                "cnpj_cpf": {
+                  "type": "string",
+                  "description": "CNPJ ou CPF (apenas números)"
+                },
+                "inscricao_estadual": {
+                  "type": "string",
+                  "maxLength": 20,
+                  "nullable": true
+                },
+                "cep": {
+                  "type": "string",
+                  "description": "CEP (apenas números, 8 dígitos)"
+                },
+                "rua": {
+                  "type": "string",
+                  "minLength": 3,
+                  "maxLength": 255
+                },
+                "numero": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "complemento": {
+                  "type": "string",
+                  "maxLength": 100,
+                  "nullable": true
+                },
+                "bairro": {
+                  "type": "string",
+                  "minLength": 2,
+                  "maxLength": 100
+                },
+                "cidade": {
+                  "type": "string",
+                  "minLength": 2,
+                  "maxLength": 100
+                },
+                "uf": {
+                  "type": "string",
+                  "minLength": 2,
+                  "maxLength": 2,
+                  "enum": [
+                    "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA",
+                    "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN",
+                    "RS", "RO", "RR", "SC", "SP", "SE", "TO"
+                  ]
+                },
+                "centro": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 50
+                },
+                "warehouse_number": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 50
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Empresa criada com sucesso",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmpresaResponse"
+              }
+            }
+          }
+        },
+        "400": {
+          "description": "Erro de validação ou empresa já existente"
+        }
+      }
+    },
+    {
+      "path": "/configuracoes/empresa",
+      "method": "GET",
+      "summary": "Listar empresas",
+      "description": "Lista as empresas cadastradas.",
+      "permissions": ["master", "admin", "user"],
+      "parameters": [
+        {
+          "name": "include_deleted",
+          "in": "query",
+          "schema": {
+            "type": "boolean",
+            "default": false
+          },
+          "description": "Incluir empresas deletadas"
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Lista de empresas",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/EmpresaResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "path": "/configuracoes/empresa/{uuid}",
+      "method": "GET",
+      "summary": "Obter empresa",
+      "description": "Obtém os detalhes de uma empresa pelo UUID.",
+      "permissions": ["master", "admin", "user"],
+      "parameters": [
+        {
+          "name": "uuid",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Detalhes da empresa",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmpresaResponse"
+              }
+            }
+          }
+        },
+        "404": {
+          "description": "Empresa não encontrada"
+        }
+      }
+    },
+    {
+      "path": "/configuracoes/empresa/{uuid}",
+      "method": "PUT",
+      "summary": "Atualizar empresa",
+      "description": "Atualiza os dados de uma empresa existente.",
+      "permissions": ["master", "admin"],
+      "parameters": [
+        {
+          "name": "uuid",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "nome_empresa": {
+                  "type": "string",
+                  "minLength": 3,
+                  "maxLength": 255
+                },
+                "cnpj_cpf": {
+                  "type": "string"
+                },
+                "inscricao_estadual": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "cep": {
+                  "type": "string"
+                },
+                "rua": {
+                  "type": "string",
+                  "minLength": 3,
+                  "maxLength": 255
+                },
+                "numero": {
+                  "type": "string",
+                  "maxLength": 20
+                },
+                "complemento": {
+                  "type": "string",
+                  "maxLength": 100
+                },
+                "bairro": {
+                  "type": "string",
+                  "minLength": 2,
+                  "maxLength": 100
+                },
+                "cidade": {
+                  "type": "string",
+                  "minLength": 2,
+                  "maxLength": 100
+                },
+                "uf": {
+                  "type": "string",
+                  "minLength": 2,
+                  "maxLength": 2
+                },
+                "centro": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 50
+                },
+                "warehouse_number": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 50
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Empresa atualizada com sucesso",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmpresaResponse"
+              }
+            }
+          }
+        },
+        "404": {
+          "description": "Empresa não encontrada"
+        }
+      }
+    },
+    {
+      "path": "/configuracoes/empresa/{uuid}",
+      "method": "DELETE",
+      "summary": "Deletar empresa",
+      "description": "Realiza a exclusão lógica (soft delete) de uma empresa.",
+      "permissions": ["master", "admin"],
+      "parameters": [
+        {
+          "name": "uuid",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Empresa deletada com sucesso",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "404": {
+          "description": "Empresa não encontrada"
+        }
+      }
+    },
+    {
+      "path": "/configuracoes/empresa/{uuid}/gerar-codigo-cliente",
+      "method": "POST",
+      "summary": "Gerar código de cliente",
+      "description": "Gera um código interno sequencial de cliente para a empresa.",
+      "permissions": ["master", "admin"],
+      "parameters": [
+        {
+          "name": "uuid",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Código gerado com sucesso",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "codigo_cliente": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "400": {
+          "description": "Código já existe para esta empresa"
+        }
+      }
+    },
+    {
+      "path": "/configuracoes/empresa/{uuid}/gerar-codigo-fornecedor",
+      "method": "POST",
+      "summary": "Gerar código de fornecedor",
+      "description": "Gera um código interno sequencial de fornecedor para a empresa.",
+      "permissions": ["master", "admin"],
+      "parameters": [
+        {
+          "name": "uuid",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Código gerado com sucesso",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "codigo_fornecedor": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "400": {
+          "description": "Código já existe para esta empresa"
+        }
+      }
+    }
+  ],
+  "components": {
+    "schemas": {
+      "EmpresaResponse": {
+        "type": "object",
+        "properties": {
+          "uuid": {
+            "type": "string"
+          },
+          "nome_empresa": {
+            "type": "string"
+          },
+          "cnpj_cpf": {
+            "type": "string"
+          },
+          "inscricao_estadual": {
+            "type": "string",
+            "nullable": true
+          },
+          "cep": {
+            "type": "string"
+          },
+          "rua": {
+            "type": "string"
+          },
+          "numero": {
+            "type": "string"
+          },
+          "complemento": {
+            "type": "string",
+            "nullable": true
+          },
+          "bairro": {
+            "type": "string"
+          },
+          "cidade": {
+            "type": "string"
+          },
+          "uf": {
+            "type": "string"
+          },
+          "centro": {
+            "type": "string"
+          },
+          "warehouse_number": {
+            "type": "string"
+          },
+          "codigo_cliente": {
+            "type": "string",
+            "nullable": true
+          },
+          "codigo_fornecedor": {
+            "type": "string",
+            "nullable": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    }
+  }
+}

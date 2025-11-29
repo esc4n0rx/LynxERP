@@ -1,0 +1,185 @@
+{
+  "base_url": "http://localhost:8000/api/v1",
+  "auth_header": "Authorization: Bearer {token}",
+"apps": {
+"list": {
+"method": "GET",
+"path": "/apps",
+"query": "?include_disabled=false",
+"response": {
+"success": true,
+"total": 15,
+"apps": [
+{
+"internal_code": "vendas-pedidos",
+"name": "Pedidos de Venda",
+"version": "1.0.0",
+"description": "Gestão de pedidos",
+"icon": "shopping-cart",
+"route_prefix": "/vendas/pedidos",
+"enabled": true,
+"routes_count": 5
+}
+]
+}
+},
+"tree": {
+  "method": "GET",
+  "path": "/apps/tree",
+  "query": "?include_disabled=false",
+  "response": {
+    "success": true,
+    "total_roots": 7,
+    "tree": [
+      {
+        "internal_code": "vendas-pedidos",
+        "name": "Pedidos de Venda",
+        "icon": "shopping-cart",
+        "route_prefix": "/vendas/pedidos",
+        "enabled": true,
+        "routes_count": 5,
+        "children": []
+      }
+    ]
+  }
+},
+
+"get": {
+  "method": "GET",
+  "path": "/apps/{internal_code}",
+  "response": {
+    "success": true,
+    "app": {
+      "internal_code": "vendas-pedidos",
+      "name": "Pedidos de Venda",
+      "version": "1.0.0",
+      "icon": "shopping-cart",
+      "enabled": true,
+      "routes_count": 5
+    }
+  }
+},
+
+"routes": {
+  "method": "GET",
+  "path": "/apps/{internal_code}/routes",
+  "response": {
+    "success": true,
+    "app_code": "vendas-pedidos",
+    "total_routes": 5,
+    "routes": [
+      {
+        "path": "/vendas/pedidos",
+        "method": "GET",
+        "description": "Listar pedidos",
+        "permissions": ["user", "admin"]
+      }
+    ]
+  }
+},
+
+"activate": {
+  "method": "POST",
+  "path": "/apps/{internal_code}/activate",
+  "roles": ["master", "admin"],
+  "response": {
+    "success": true,
+    "message": "App ativado com sucesso",
+    "routes_loaded": 5
+  }
+},
+
+"deactivate": {
+  "method": "POST",
+  "path": "/apps/{internal_code}/deactivate",
+  "roles": ["master", "admin"],
+  "response": {
+    "success": true,
+    "message": "App desativado com sucesso"
+  }
+},
+
+"rediscover": {
+  "method": "POST",
+  "path": "/apps/rediscover",
+  "roles": ["master", "admin"],
+  "response": {
+    "success": true,
+    "stats": {
+      "discovered": 10,
+      "registered": 3,
+      "updated": 7
+    }
+  }
+}
+},
+"logs": {
+"list": {
+"method": "GET",
+"path": "/logs",
+"roles": ["master", "admin"],
+"query": "?app_code={code}&level={level}&limit=100&offset=0",
+"levels": ["DEBUG", "INFO", "WARN", "ERROR", "CRITICAL"],
+"response": {
+"success": true,
+"total": 150,
+"limit": 100,
+"offset": 0,
+"logs": [
+{
+"log_id": "uuid",
+"app_code": "vendas-pedidos",
+"level": "INFO",
+"message": "Pedido criado",
+"context": {"pedido_id": "123"},
+"timestamp": "2025-11-11T10:30:00"
+}
+]
+}
+},
+"get": {
+  "method": "GET",
+  "path": "/logs/{log_id}",
+  "roles": ["master", "admin"],
+  "response": {
+    "success": true,
+    "log": {
+      "log_id": "uuid",
+      "app_code": "vendas-pedidos",
+      "level": "ERROR",
+      "message": "Erro ao processar",
+      "context": {"error": "details"},
+      "timestamp": "2025-11-11T10:30:00"
+    }
+  }
+},
+"summary": {
+  "method": "GET",
+  "path": "/logs/summary",
+  "roles": ["master", "admin"],
+  "response": {
+    "success": true,
+    "summary": [
+      {
+        "app_code": "vendas-pedidos",
+        "level": "ERROR",
+        "total": 12,
+        "last_occurrence": "2025-11-11T10:30:00"
+      }
+    ]
+  }
+},
+
+"errors": {
+  "method": "GET",
+  "path": "/logs/errors/recent",
+  "roles": ["master", "admin"],
+  "query": "?limit=50",
+  "response": {
+    "success": true,
+    "total": 25,
+    "errors": []
+  }
+}
+}
+}

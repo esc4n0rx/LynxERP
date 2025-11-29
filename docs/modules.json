@@ -1,0 +1,805 @@
+{
+  "api_info": {
+    "name": "ERP Lynx - Modules API",
+    "version": "1.0.0",
+    "base_url": "http://localhost:8000/api/v1",
+    "description": "Documentação completa das rotas de gerenciamento de módulos hierárquicos do ERP Lynx"
+  },
+  "endpoints": [
+    {
+      "id": "create_module",
+      "name": "Criar Módulo",
+      "method": "POST",
+      "path": "/modules",
+      "description": "Cria um novo módulo na hierarquia do sistema. Permite criar módulos principais (level 0) ou sub-módulos até o nível 3.",
+      "authentication_required": true,
+      "required_roles": ["master", "admin"],
+      "request": {
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer {token}"
+        },
+        "query_params": {},
+        "body": {
+          "type": "object",
+          "required": ["nome", "slug"],
+          "properties": {
+            "parent_uuid": {
+              "type": "string",
+              "format": "uuid",
+              "description": "UUID do módulo pai. Null para módulos principais (level 0)",
+              "example": "mod-cadastros-001",
+              "optional": true
+            },
+            "nome": {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 100,
+              "description": "Nome descritivo do módulo",
+              "example": "Transportadoras"
+            },
+            "slug": {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 100,
+              "pattern": "^[a-z0-9-_]+$",
+              "description": "Identificador único (apenas letras minúsculas, números, hífens e underscores)",
+              "example": "transportadoras"
+            },
+            "descricao": {
+              "type": "string",
+              "description": "Descrição detalhada do módulo",
+              "example": "Gestão completa de transportadoras e fretes",
+              "optional": true
+            },
+            "icone": {
+              "type": "string",
+              "maxLength": 50,
+              "description": "Nome do ícone a ser utilizado (ex: feather icons)",
+              "example": "truck",
+              "optional": true
+            },
+            "rota": {
+              "type": "string",
+              "maxLength": 255,
+              "description": "Rota frontend associada ao módulo",
+              "example": "/cadastros/transportadoras",
+              "optional": true
+            },
+            "ordem": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Ordem de exibição dentro do mesmo nível/pai",
+              "example": 6,
+              "default": 0,
+              "optional": true
+            },
+            "ativo": {
+              "type": "boolean",
+              "description": "Se o módulo está ativo",
+              "example": true,
+              "default": true,
+              "optional": true
+            }
+          }
+        }
+      },
+      "response": {
+        "success": {
+          "status_code": 201,
+          "description": "Módulo criado com sucesso",
+          "content_type": "application/json",
+          "body": {
+            "success": true,
+            "module": {
+              "uuid": "550e8400-e29b-41d4-a716-446655440000",
+              "parent_uuid": "mod-cadastros-001",
+              "nome": "Transportadoras",
+              "slug": "transportadoras",
+              "descricao": "Gestão completa de transportadoras e fretes",
+              "icone": "truck",
+              "rota": "/cadastros/transportadoras",
+              "level": 1,
+              "ordem": 6,
+              "ativo": true,
+              "created_at": "2025-11-10T10:30:00.000000",
+              "updated_at": "2025-11-10T10:30:00.000000"
+            }
+          }
+        },
+        "error_unauthorized": {
+          "status_code": 401,
+          "description": "Token inválido ou não fornecido",
+          "content_type": "application/json",
+          "body": {
+            "detail": "Token inválido ou expirado"
+          }
+        },
+        "error_forbidden": {
+          "status_code": 403,
+          "description": "Usuário sem permissão (não é master ou admin)",
+          "content_type": "application/json",
+          "body": {
+            "detail": "Permissão insuficiente"
+          }
+        },
+        "error_not_found": {
+          "status_code": 404,
+          "description": "Módulo pai não encontrado",
+          "content_type": "application/json",
+          "body": {
+            "detail": "Módulo pai não encontrado"
+          }
+        },
+        "error_conflict": {
+          "status_code": 409,
+          "description": "Slug duplicado no mesmo nível",
+          "content_type": "application/json",
+          "body": {
+            "detail": "Já existe um módulo com este slug no mesmo nível"
+          }
+        },
+        "error_bad_request": {
+          "status_code": 400,
+          "description": "Limite de hierarquia atingido ou dados inválidos",
+          "content_type": "application/json",
+          "body": {
+            "detail": "Limite de hierarquia atingido (máximo 4 níveis)"
+          }
+        },
+        "error_server": {
+          "status_code": 500,
+          "description": "Erro interno do servidor",
+          "content_type": "application/json",
+          "body": {
+            "detail": "Erro ao criar módulo: [mensagem de erro]"
+          }
+        }
+      },
+      "notes": [
+        "O campo 'level' é calculado automaticamente baseado no parent_uuid",
+        "Level 0 = Módulo principal (parent_uuid = null)",
+        "Level 1-3 = Sub-módulos (máximo 4 níveis de hierarquia)",
+        "O slug deve ser único dentro do mesmo pai",
+        "Slugs são automaticamente convertidos para lowercase"
+      ]
+    },
+    {
+      "id": "list_modules",
+      "name": "Listar Módulos (Plano)",
+      "method": "GET",
+      "path": "/modules",
+      "description": "Lista todos os módulos do sistema em formato plano (não hierárquico), ordenados por level, ordem e nome.",
+      "authentication_required": true,
+      "required_roles": ["*"],
+      "request": {
+        "headers": {
+          "Authorization": "Bearer {token}"
+        },
+        "query_params": {
+          "include_inactive": {
+            "type": "boolean",
+            "description": "Se true, inclui módulos com ativo=false",
+            "example": "false",
+            "default": false,
+            "optional": true
+          }
+        },
+        "body": null
+      },
+      "response": {
+        "success": {
+          "status_code": 200,
+          "description": "Lista de módulos retornada com sucesso",
+          "content_type": "application/json",
+          "body": {
+            "success": true,
+            "total": 42,
+            "modules": [
+              {
+                "uuid": "mod-cadastros-001",
+                "parent_uuid": null,
+                "nome": "Cadastros",
+                "slug": "cadastros",
+                "descricao": "Gestão de cadastros gerais do sistema",
+                "icone": "database",
+                "rota": null,
+                "level": 0,
+                "ordem": 1,
+                "ativo": true,
+                "created_at": "2025-11-10T08:00:00.000000",
+                "updated_at": "2025-11-10T08:00:00.000000"
+              },
+              {
+                "uuid": "mod-cad-clientes-001",
+                "parent_uuid": "mod-cadastros-001",
+                "nome": "Clientes",
+                "slug": "clientes",
+                "descricao": "Cadastro de clientes",
+                "icone": "users",
+                "rota": "/cadastros/clientes",
+                "level": 1,
+                "ordem": 1,
+                "ativo": true,
+                "created_at": "2025-11-10T08:00:00.000000",
+                "updated_at": "2025-11-10T08:00:00.000000"
+              }
+            ]
+          }
+        },
+        "error_unauthorized": {
+          "status_code": 401,
+          "description": "Token inválido ou não fornecido",
+          "content_type": "application/json",
+          "body": {
+            "detail": "Token inválido ou expirado"
+          }
+        },
+        "error_server": {
+          "status_code": 500,
+          "description": "Erro interno do servidor",
+          "content_type": "application/json",
+          "body": {
+            "detail": "Erro ao listar módulos: [mensagem de erro]"
+          }
+        }
+      },
+      "notes": [
+        "Retorna lista plana (sem aninhamento)",
+        "Ordenação: level ASC, ordem ASC, nome ASC",
+        "Por padrão, apenas módulos ativos são retornados",
+        "Qualquer usuário autenticado pode visualizar"
+      ]
+    },
+    {
+      "id": "list_modules_tree",
+      "name": "Listar Módulos (Árvore)",
+      "method": "GET",
+      "path": "/modules/tree",
+      "description": "Retorna a estrutura hierárquica completa dos módulos com apps relacionados em formato de árvore com filhos aninhados.",
+      "authentication_required": true,
+      "required_roles": ["*"],
+      "response": {
+        "success": true,
+        "total_roots": 7,
+        "tree": [
+          {
+            "uuid": "mod-cadastros-001",
+            "parent_uuid": null,
+            "nome": "Cadastros",
+            "slug": "cadastros",
+            "descricao": "Gestão de cadastros gerais do sistema",
+            "icone": "database",
+            "rota": null,
+            "level": 0,
+            "ordem": 1,
+            "ativo": true,
+            "apps": [],
+            "children": [
+              {
+                "uuid": "mod-cad-clientes-001",
+                "parent_uuid": "mod-cadastros-001",
+                "nome": "Clientes",
+                "slug": "clientes",
+                "descricao": "Cadastro de clientes",
+                "icone": "users",
+                "rota": "/cadastros/clientes",
+                "level": 1,
+                "ordem": 1,
+                "ativo": true,
+                "apps": [
+                  {
+                    "uuid": "app-cli-gestao-001",
+                    "internal_code": "clientes-gestao",
+                    "name": "Gestão de Clientes",
+                    "version": "1.0.0",
+                    "description": "App completo de gestão de clientes",
+                    "icon": "users",
+                    "route_prefix": "/cadastros/clientes",
+                    "enabled": true,
+                    "routes_count": 8
+                  }
+                ],
+                "children": [
+                  {
+                    "uuid": "mod-cli-fisica-001",
+                    "parent_uuid": "mod-cad-clientes-001",
+                    "nome": "Pessoa Física",
+                    "slug": "pessoa-fisica",
+                    "descricao": "Clientes pessoa física",
+                    "icone": "user",
+                    "rota": "/cadastros/clientes/pessoa-fisica",
+                    "level": 2,
+                    "ordem": 1,
+                    "ativo": true,
+                    "apps": [
+                      {
+                        "uuid": "app-cli-pf-001",
+                        "internal_code": "clientes-pessoa-fisica",
+                        "name": "Cadastro PF",
+                        "version": "1.0.0",
+                        "description": "Cadastro de pessoa física",
+                        "icon": "user",
+                        "route_prefix": "/cadastros/clientes/pessoa-fisica",
+                        "enabled": true,
+                        "routes_count": 5
+                      }
+                    ],
+                    "children": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "uuid": "mod-config-001",
+            "parent_uuid": null,
+            "nome": "Configurações",
+            "slug": "configuracoes",
+            "icone": "settings",
+            "rota": null,
+            "level": 0,
+            "ordem": 7,
+            "ativo": true,
+            "apps": [],
+            "children": [
+              {
+                "uuid": "mod-cfg-empresa-001",
+                "parent_uuid": "mod-config-001",
+                "nome": "Empresa",
+                "slug": "empresa",
+                "icone": "briefcase",
+                "rota": "/configuracoes/empresa",
+                "level": 1,
+                "ordem": 1,
+                "ativo": true,
+                "apps": [
+                  {
+                    "uuid": "app-empresa-001",
+                    "internal_code": "config-empresa",
+                    "name": "Configuração de Empresa",
+                    "version": "1.0.0",
+                    "description": "App de criação e gestão de dados da empresa",
+                    "icon": "briefcase",
+                    "route_prefix": "/configuracoes/empresa",
+                    "enabled": true,
+                    "routes_count": 6
+                  }
+                ],
+                "children": []
+              }
+            ]
+          }
+        ]
+      },
+      "notes": [
+        "Retorna apenas módulos de nível 0 (principais) no array raiz",
+        "Filhos são aninhados no campo 'children' recursivamente",
+        "Apps relacionados aparecem no campo 'apps' de cada módulo",
+        "Apps são vinculados ao módulo mais específico baseado em route_prefix",
+        "Campo 'apps' é sempre um array (vazio se não houver apps)",
+        "Estrutura ideal para renderizar menus laterais no frontend"
+      ]
+    },
+    {
+      "id": "get_module",
+      "name": "Obter Módulo por UUID",
+      "method": "GET",
+      "path": "/modules/{module_uuid}",
+      "description": "Retorna os detalhes completos de um módulo específico pelo seu UUID.",
+      "authentication_required": true,
+      "required_roles": ["*"],
+      "request": {
+        "headers": {
+          "Authorization": "Bearer {token}"
+        },
+        "path_params": {
+          "module_uuid": {
+            "type": "string",
+            "description": "UUID do módulo",
+            "example": "mod-cadastros-001"
+          }
+        },
+        "query_params": {},
+        "body": null
+      },
+      "response": {
+        "success": {
+          "status_code": 200,
+          "description": "Módulo encontrado",
+          "content_type": "application/json",
+          "body": {
+            "success": true,
+            "module": {
+              "uuid": "mod-cadastros-001",
+              "parent_uuid": null,
+              "nome": "Cadastros",
+              "slug": "cadastros",
+              "descricao": "Gestão de cadastros gerais do sistema",
+              "icone": "database",
+              "rota": null,
+              "level": 0,
+              "ordem": 1,
+              "ativo": true,
+              "created_at": "2025-11-10T08:00:00.000000",
+              "updated_at": "2025-11-10T08:00:00.000000"
+            }
+          }
+        },
+        "error_unauthorized": {
+          "status_code": 401,
+          "description": "Token inválido ou não fornecido",
+          "content_type": "application/json",
+          "body": {
+            "detail": "Token inválido ou expirado"
+          }
+        },
+        "error_not_found": {
+          "status_code": 404,
+          "description": "Módulo não encontrado",
+          "content_type": "application/json",
+          "body": {
+            "detail": "Módulo não encontrado"
+          }
+        },
+        "error_server": {
+          "status_code": 500,
+          "description": "Erro interno do servidor",
+          "content_type": "application/json",
+          "body": {
+            "detail": "Erro ao obter módulo: [mensagem de erro]"
+          }
+        }
+      },
+      "notes": [
+        "Retorna apenas módulos não deletados (deleted_at IS NULL)",
+        "Qualquer usuário autenticado pode visualizar"
+      ]
+    },
+    {
+      "id": "get_module_children",
+      "name": "Listar Filhos de um Módulo",
+      "method": "GET",
+      "path": "/modules/{module_uuid}/children",
+      "description": "Lista apenas os filhos diretos (nível imediatamente inferior) de um módulo específico.",
+      "authentication_required": true,
+      "required_roles": ["*"],
+      "request": {
+        "headers": {
+          "Authorization": "Bearer {token}"
+        },
+        "path_params": {
+          "module_uuid": {
+            "type": "string",
+            "description": "UUID do módulo pai",
+            "example": "mod-cadastros-001"
+          }
+        },
+        "query_params": {
+          "include_inactive": {
+            "type": "boolean",
+            "description": "Se true, inclui módulos com ativo=false",
+            "example": "false",
+            "default": false,
+            "optional": true
+          }
+        },
+        "body": null
+      },
+      "response": {
+        "success": {
+          "status_code": 200,
+          "description": "Lista de filhos retornada com sucesso",
+          "content_type": "application/json",
+          "body": {
+            "success": true,
+            "parent_uuid": "mod-cadastros-001",
+            "total": 5,
+            "children": [
+              {
+                "uuid": "mod-cad-clientes-001",
+                "parent_uuid": "mod-cadastros-001",
+                "nome": "Clientes",
+                "slug": "clientes",
+                "descricao": "Cadastro de clientes",
+                "icone": "users",
+                "rota": "/cadastros/clientes",
+                "level": 1,
+                "ordem": 1,
+                "ativo": true,
+                "created_at": "2025-11-10T08:00:00.000000",
+                "updated_at": "2025-11-10T08:00:00.000000"
+              },
+              {
+                "uuid": "mod-cad-fornecedores-001",
+                "parent_uuid": "mod-cadastros-001",
+                "nome": "Fornecedores",
+                "slug": "fornecedores",
+                "descricao": "Cadastro de fornecedores",
+                "icone": "truck",
+                "rota": "/cadastros/fornecedores",
+                "level": 1,
+                "ordem": 2,
+                "ativo": true,
+                "created_at": "2025-11-10T08:00:00.000000",
+                "updated_at": "2025-11-10T08:00:00.000000"
+              }
+            ]
+          }
+        },
+        "error_unauthorized": {
+          "status_code": 401,
+          "description": "Token inválido ou não fornecido",
+          "content_type": "application/json",
+          "body": {
+            "detail": "Token inválido ou expirado"
+          }
+        },
+        "error_server": {
+          "status_code": 500,
+          "description": "Erro interno do servidor",
+          "content_type": "application/json",
+          "body": {
+            "detail": "Erro ao listar filhos do módulo: [mensagem de erro]"
+          }
+        }
+      },
+      "notes": [
+        "Retorna apenas filhos DIRETOS (não recursivo)",
+        "Para árvore completa, use /modules/tree",
+        "Ordenação: ordem ASC, nome ASC",
+        "Retorna array vazio se não houver filhos"
+      ]
+    },
+    {
+      "id": "update_module",
+      "name": "Atualizar Módulo",
+      "method": "PUT",
+      "path": "/modules/{module_uuid}",
+      "description": "Atualiza os dados de um módulo existente. Permite atualização parcial (apenas campos informados serão alterados).",
+      "authentication_required": true,
+      "required_roles": ["master", "admin"],
+      "request": {
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer {token}"
+        },
+        "path_params": {
+          "module_uuid": {
+            "type": "string",
+            "description": "UUID do módulo a ser atualizado",
+            "example": "mod-cad-clientes-001"
+          }
+        },
+        "query_params": {},
+        "body": {
+          "type": "object",
+          "required": [],
+          "properties": {
+            "nome": {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 100,
+              "description": "Novo nome do módulo",
+              "example": "Clientes e Prospects",
+              "optional": true
+            },
+            "slug": {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 100,
+              "pattern": "^[a-z0-9-_]+$",
+              "description": "Novo slug (deve ser único no mesmo nível)",
+              "example": "clientes-prospects",
+              "optional": true
+            },
+            "descricao": {
+              "type": "string",
+              "description": "Nova descrição",
+              "example": "Gestão completa de clientes e prospects",
+              "optional": true
+            },
+            "icone": {
+              "type": "string",
+              "maxLength": 50,
+              "description": "Novo ícone",
+              "example": "user-check",
+              "optional": true
+            },
+            "rota": {
+              "type": "string",
+              "maxLength": 255,
+              "description": "Nova rota",
+              "example": "/cadastros/clientes-prospects",
+              "optional": true
+            },
+            "ordem": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Nova ordem",
+              "example": 0,
+              "optional": true
+            },
+            "ativo": {
+              "type": "boolean",
+              "description": "Novo status",
+              "example": false,
+              "optional": true
+            }
+          }
+        }
+      },
+      "response": {
+        "success": {
+          "status_code": 200,
+          "description": "Módulo atualizado com sucesso",
+          "content_type": "application/json",
+          "body": {
+            "success": true,
+            "message": "Módulo atualizado com sucesso",
+            "module": {
+              "uuid": "mod-cad-clientes-001",
+              "parent_uuid": "mod-cadastros-001",
+              "nome": "Clientes e Prospects",
+              "slug": "clientes-prospects",
+              "descricao": "Gestão completa de clientes e prospects",
+              "icone": "user-check",
+              "rota": "/cadastros/clientes-prospects",
+              "level": 1,
+              "ordem": 0,
+              "ativo": true,
+              "created_at": "2025-11-10T08:00:00.000000",
+              "updated_at": "2025-11-10T14:30:00.000000"
+            }
+          }
+        },
+        "error_unauthorized": {
+          "status_code": 401,
+          "description": "Token inválido ou não fornecido",
+          "content_type": "application/json",
+          "body": {
+            "detail": "Token inválido ou expirado"
+          }
+        },
+        "error_forbidden": {
+          "status_code": 403,
+          "description": "Usuário sem permissão",
+          "content_type": "application/json",
+          "body": {
+            "detail": "Permissão insuficiente"
+          }
+        },
+        "error_not_found": {
+          "status_code": 404,
+          "description": "Módulo não encontrado",
+          "content_type": "application/json",
+          "body": {
+            "detail": "Módulo não encontrado"
+          }
+        },
+        "error_conflict": {
+          "status_code": 409,
+          "description": "Slug duplicado",
+          "content_type": "application/json",
+          "body": {
+            "detail": "Já existe um módulo com este slug no mesmo nível"
+          }
+        },
+        "error_server": {
+          "status_code": 500,
+          "description": "Erro interno do servidor",
+          "content_type": "application/json",
+          "body": {
+            "detail": "Erro ao atualizar módulo: [mensagem de erro]"
+          }
+        }
+      },
+      "notes": [
+        "Atualização parcial: apenas campos informados são alterados",
+        "Não é possível alterar 'parent_uuid' ou 'level' (recrie o módulo se necessário)",
+        "Slug deve continuar único dentro do mesmo pai",
+        "Campo 'updated_at' é atualizado automaticamente",
+        "Desativar módulo (ativo=false) não desativa filhos automaticamente"
+      ]
+    },
+    {
+      "id": "delete_module",
+      "name": "Deletar Módulo",
+      "method": "DELETE",
+      "path": "/modules/{module_uuid}",
+      "description": "Realiza soft delete de um módulo. Por padrão, bloqueia deleção se houver filhos ativos. Com force=true, deleta em cascata.",
+      "authentication_required": true,
+      "required_roles": ["master", "admin"],
+      "request": {
+        "headers": {
+          "Authorization": "Bearer {token}"
+        },
+        "path_params": {
+          "module_uuid": {
+            "type": "string",
+            "description": "UUID do módulo a ser deletado",
+            "example": "mod-cli-fisica-001"
+          }
+        },
+        "query_params": {
+          "force": {
+            "type": "boolean",
+            "description": "Se true, deleta em cascata incluindo todos os filhos",
+            "example": "false",
+            "default": false,
+            "optional": true
+          }
+        },
+        "body": null
+      },
+      "response": {
+        "success_without_children": {
+          "status_code": 200,
+          "description": "Módulo sem filhos deletado com sucesso",
+          "content_type": "application/json",
+          "body": {
+            "success": true,
+            "message": "Módulo deletado com sucesso"
+          }
+        },
+        "success_with_cascade": {
+          "status_code": 200,
+          "description": "Módulo e filhos deletados em cascata",
+          "content_type": "application/json",
+          "body": {
+            "success": true,
+            "message": "Módulo e seus filhos deletados com sucesso"
+          }
+        },
+        "error_unauthorized": {
+          "status_code": 401,
+          "description": "Token inválido ou não fornecido",
+          "content_type": "application/json",
+          "body": {
+            "detail": "Token inválido ou expirado"
+          }
+        },
+        "error_forbidden": {
+          "status_code": 403,
+          "description": "Usuário sem permissão",
+          "content_type": "application/json",
+          "body": {
+            "detail": "Permissão insuficiente"
+          }
+        },
+        "error_not_found": {
+          "status_code": 404,
+          "description": "Módulo não encontrado",
+          "content_type": "application/json",
+          "body": {
+            "detail": "Módulo não encontrado"
+          }
+        },
+        "error_has_children": {
+          "status_code": 400,
+          "description": "Módulo possui filhos ativos (sem force)",
+          "content_type": "application/json",
+          "body": {
+            "detail": "Não é possível deletar módulo com filhos ativos. Use force=true para deletar em cascata."
+          }
+        },
+        "error_server": {
+          "status_code": 500,
+          "description": "Erro interno do servidor",
+          "content_type": "application/json",
+          "body": {
+            "detail": "Erro ao deletar módulo: [mensagem de erro]"
+          }
+        }
+      },
+      "notes": [
+        "Soft delete: campo 'deleted_at' é preenchido com timestamp",
+        "Módulos deletados não aparecem em consultas padrão",
+        "Sem force: bloqueia se houver filhos ativos",
+        "Com force=true: deleta recursivamente todos os descendentes",
+        "Cascade delete é feito via código (não constraint SQL)",
+        "Não há endpoint de recuperação (undelete) - implementar se necessário"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,330 @@
+{
+  "info": {
+    "title": "Configuração de Intervalos API",
+    "description": "Gestão de intervalos numéricos para documentos e etiquetas",
+    "version": "1.0.0",
+    "route_prefix": "/configuracoes/range"
+  },
+  "routes": [
+    {
+      "path": "/configuracoes/range",
+      "method": "POST",
+      "summary": "Criar novo range",
+      "description": "Cria um novo range de numeração.",
+      "permissions": ["master", "admin"],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "nome",
+                "codigo_identificador",
+                "numero_final"
+              ],
+              "properties": {
+                "nome": {
+                  "type": "string",
+                  "minLength": 3,
+                  "maxLength": 100,
+                  "description": "Nome descritivo do intervalo"
+                },
+                "codigo_identificador": {
+                  "type": "string",
+                  "minLength": 3,
+                  "maxLength": 50,
+                  "description": "Código único (ex: NF_SAIDA)"
+                },
+                "descricao": {
+                  "type": "string",
+                  "nullable": true,
+                  "description": "Descrição detalhada"
+                },
+                "prefixo": {
+                  "type": "string",
+                  "maxLength": 20,
+                  "nullable": true
+                },
+                "sulfixo": {
+                  "type": "string",
+                  "maxLength": 20,
+                  "nullable": true
+                },
+                "numero_inicial": {
+                  "type": "integer",
+                  "default": 1,
+                  "minimum": 0
+                },
+                "numero_final": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "description": "Deve ser maior que numero_inicial"
+                },
+                "numero_atual": {
+                  "type": "integer",
+                  "nullable": true,
+                  "description": "Se omitido, será igual ao numero_inicial"
+                },
+                "ativo": {
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Range criado com sucesso",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RangeResponse"
+              }
+            }
+          }
+        },
+        "400": {
+          "description": "Erro de validação ou código duplicado"
+        }
+      }
+    },
+    {
+      "path": "/configuracoes/range",
+      "method": "GET",
+      "summary": "Listar ranges",
+      "description": "Lista ranges cadastrados.",
+      "permissions": ["master", "admin", "user"],
+      "parameters": [
+        {
+          "name": "include_deleted",
+          "in": "query",
+          "schema": {
+            "type": "boolean",
+            "default": false
+          },
+          "description": "Incluir ranges deletados"
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Lista de ranges",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/RangeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "path": "/configuracoes/range/{uuid}",
+      "method": "GET",
+      "summary": "Obter range",
+      "description": "Busca range por UUID.",
+      "permissions": ["master", "admin", "user"],
+      "parameters": [
+        {
+          "name": "uuid",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Detalhes do range",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RangeResponse"
+              }
+            }
+          }
+        },
+        "404": {
+          "description": "Range não encontrado"
+        }
+      }
+    },
+    {
+      "path": "/configuracoes/range/{uuid}",
+      "method": "PUT",
+      "summary": "Atualizar range",
+      "description": "Atualiza dados do range.",
+      "permissions": ["master", "admin"],
+      "parameters": [
+        {
+          "name": "uuid",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "nome": {
+                  "type": "string",
+                  "minLength": 3,
+                  "maxLength": 100
+                },
+                "descricao": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "prefixo": {
+                  "type": "string",
+                  "maxLength": 20,
+                  "nullable": true
+                },
+                "sulfixo": {
+                  "type": "string",
+                  "maxLength": 20,
+                  "nullable": true
+                },
+                "numero_final": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "numero_atual": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "ativo": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Range atualizado com sucesso",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RangeResponse"
+              }
+            }
+          }
+        },
+        "400": {
+          "description": "Erro de validação (ex: atual > final)"
+        },
+        "404": {
+          "description": "Range não encontrado"
+        }
+      }
+    },
+    {
+      "path": "/configuracoes/range/{uuid}",
+      "method": "DELETE",
+      "summary": "Deletar range",
+      "description": "Deleta range (apenas se não estiver em uso).",
+      "permissions": ["master", "admin"],
+      "parameters": [
+        {
+          "name": "uuid",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Range deletado com sucesso",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "400": {
+          "description": "Não é possível deletar range em uso"
+        },
+        "404": {
+          "description": "Range não encontrado"
+        }
+      }
+    }
+  ],
+  "components": {
+    "schemas": {
+      "RangeResponse": {
+        "type": "object",
+        "properties": {
+          "uuid": {
+            "type": "string"
+          },
+          "nome": {
+            "type": "string"
+          },
+          "codigo_identificador": {
+            "type": "string"
+          },
+          "descricao": {
+            "type": "string",
+            "nullable": true
+          },
+          "prefixo": {
+            "type": "string",
+            "nullable": true
+          },
+          "sulfixo": {
+            "type": "string",
+            "nullable": true
+          },
+          "numero_inicial": {
+            "type": "integer"
+          },
+          "numero_final": {
+            "type": "integer"
+          },
+          "numero_atual": {
+            "type": "integer"
+          },
+          "ativo": {
+            "type": "boolean"
+          },
+          "em_uso": {
+            "type": "boolean"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    }
+  }
+}
