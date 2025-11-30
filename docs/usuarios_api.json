@@ -1,0 +1,213 @@
+{
+  "info": {
+    "title": "Gestão de Usuários API",
+    "description": "Conjunto de rotas para criação e gerenciamento de usuários do sistema Lynx ERP.",
+    "version": "1.0.0"
+  },
+  "apps": [
+    {
+      "name": "Criar Usuário",
+      "internal_code": "user-create",
+      "route_prefix": "/configuracoes/usuarios/create",
+      "routes": [
+        {
+          "path": "/configuracoes/usuarios/create",
+          "method": "POST",
+          "summary": "Criar Usuário",
+          "description": "Cria um novo usuário, gera uma senha temporária e retorna os dados criados. Requer permissão master ou admin.",
+          "permissions": ["master", "admin"],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["login", "nome", "email", "cpf"],
+                  "properties": {
+                    "login": { "type": "string", "minLength": 3, "maxLength": 100 },
+                    "nome": { "type": "string", "minLength": 3, "maxLength": 255 },
+                    "email": { "type": "string", "format": "email" },
+                    "cpf": { "type": "string", "description": "CPF válido (apenas números ou com formatação)" },
+                    "role": { "type": "string", "default": "user", "description": "Papel do usuário (user, admin, master)" },
+                    "cargo": { "type": "string", "nullable": true },
+                    "cep": { "type": "string", "nullable": true },
+                    "rua": { "type": "string", "nullable": true },
+                    "numero": { "type": "string", "nullable": true },
+                    "complemento": { "type": "string", "nullable": true },
+                    "bairro": { "type": "string", "nullable": true },
+                    "cidade": { "type": "string", "nullable": true },
+                    "uf": { "type": "string", "nullable": true },
+                    "allowed_modules": { 
+                      "type": "array", 
+                      "items": { "type": "string" }, 
+                      "description": "Lista de UUIDs dos módulos permitidos" 
+                    },
+                    "blocked_apps": { 
+                      "type": "array", 
+                      "items": { "type": "string" }, 
+                      "description": "Lista de internal_codes de apps explicitamente bloqueados" 
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Usuário criado com sucesso",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "uuid": { "type": "string" },
+                      "login": { "type": "string" },
+                      "email": { "type": "string" },
+                      "temp_password": { "type": "string", "description": "Senha temporária gerada pelo sistema" },
+                      "message": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Erro de validação ou dados duplicados (Login/Email/CPF)"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Listar Usuários",
+      "internal_code": "user-list",
+      "route_prefix": "/configuracoes/usuarios/list",
+      "routes": [
+        {
+          "path": "/configuracoes/usuarios/list",
+          "method": "GET",
+          "summary": "Listar todos os usuários",
+          "description": "Retorna uma lista de usuários cadastrados com status online/offline.",
+          "permissions": ["master", "admin"],
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "uuid": { "type": "string" },
+                        "login": { "type": "string" },
+                        "nome": { "type": "string" },
+                        "email": { "type": "string" },
+                        "role": { "type": "string" },
+                        "active": { "type": "boolean" },
+                        "cargo": { "type": "string", "nullable": true },
+                        "online": { "type": "boolean", "description": "True se tiver sessão ativa" },
+                        "last_login": { "type": "string", "format": "date-time", "nullable": true }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "path": "/configuracoes/usuarios/list/{uuid}",
+          "method": "GET",
+          "summary": "Obter detalhes do usuário",
+          "description": "Retorna dados completos de um usuário, incluindo endereço e permissões.",
+          "permissions": ["master", "admin"],
+          "parameters": [
+            { "name": "uuid", "in": "path", "required": true, "schema": { "type": "string" } }
+          ],
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "uuid": { "type": "string" },
+                      "login": { "type": "string" },
+                      "nome": { "type": "string" },
+                      "email": { "type": "string" },
+                      "cpf": { "type": "string" },
+                      "role": { "type": "string" },
+                      "active": { "type": "boolean" },
+                      "cargo": { "type": "string" },
+                      "online": { "type": "boolean" },
+                      "cep": { "type": "string" },
+                      "rua": { "type": "string" },
+                      "allowed_modules": { "type": "array", "items": { "type": "string" } },
+                      "blocked_apps": { "type": "array", "items": { "type": "string" } },
+                      "created_at": { "type": "string", "format": "date-time" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "path": "/configuracoes/usuarios/list/{uuid}",
+          "method": "PUT",
+          "summary": "Atualizar usuário",
+          "description": "Atualiza dados cadastrais e permissões do usuário.",
+          "permissions": ["master", "admin"],
+          "parameters": [
+            { "name": "uuid", "in": "path", "required": true, "schema": { "type": "string" } }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "nome": { "type": "string", "nullable": true },
+                    "email": { "type": "string", "nullable": true },
+                    "role": { "type": "string", "nullable": true },
+                    "active": { "type": "boolean", "nullable": true },
+                    "allowed_modules": { "type": "array", "items": { "type": "string" } },
+                    "blocked_apps": { "type": "array", "items": { "type": "string" } }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": { "description": "Dados atualizados com sucesso" }
+          }
+        },
+        {
+          "path": "/configuracoes/usuarios/list/{uuid}",
+          "method": "DELETE",
+          "summary": "Deletar usuário",
+          "description": "Realiza exclusão lógica (soft delete) e encerra sessões ativas.",
+          "permissions": ["master", "admin"],
+          "parameters": [
+            { "name": "uuid", "in": "path", "required": true, "schema": { "type": "string" } }
+          ],
+          "responses": {
+            "200": { "description": "Usuário deletado com sucesso" }
+          }
+        },
+        {
+          "path": "/configuracoes/usuarios/list/{uuid}/kill-sessions",
+          "method": "POST",
+          "summary": "Derrubar sessões",
+          "description": "Invalida todas as sessões ativas do usuário, forçando logout.",
+          "permissions": ["master", "admin"],
+          "parameters": [
+            { "name": "uuid", "in": "path", "required": true, "schema": { "type": "string" } }
+          ],
+          "responses": {
+            "200": { "description": "Sessões encerradas com sucesso" }
+          }
+        }
+      ]
+    }
+  ]
+}
