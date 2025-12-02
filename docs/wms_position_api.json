@@ -1,0 +1,298 @@
+{
+  "app": {
+    "internal_code": "wms-position",
+    "name": "Posições WMS",
+    "version": "1.0.0",
+    "description": "Gestão de posições de armazenamento no depósito WMS",
+    "route_prefix": "/wms/posicoes",
+    "module": "WMS",
+    "permissions": ["master", "admin", "wms_manager"]
+  },
+  "important_notes": {
+    "codigo_deposito": "No INPUT (request), aceita o CÓDIGO LEGÍVEL do depósito (ex: 'DEP1', 'DEP2'). O sistema busca automaticamente o UUID correspondente na tabela lynx_wms_depositos. No OUTPUT (response), retorna o UUID do depósito que foi gravado no banco."
+  },
+  "routes": [
+    {
+      "method": "POST",
+      "path": "/wms/posicoes",
+      "summary": "Criar Posição",
+      "description": "Cria uma nova posição de armazenamento no depósito",
+      "permissions": ["admin", "wms_manager"],
+      "request_body": {
+        "codigo_posicao": "R1-L2-P03",
+        "codigo_deposito": "DEP1",
+        "zona": "ZONA_A",
+        "rack": "RACK_01",
+        "nivel": 2,
+        "coluna": 3,
+        "tipo_posicao": "PALLET",
+        "capacidade_unidade": 1,
+        "capacidade_unidade_tipo": "PALLETS",
+        "dimensoes": {
+          "altura_mm": 1600,
+          "largura_mm": 1200,
+          "profundidade_mm": 800
+        },
+        "permite_mix": false,
+        "lot_required": false,
+        "serial_management": "NONE",
+        "control_temp": false,
+        "bloqueada": false,
+        "status": "ATIVA",
+        "prioridade_putaway": 10,
+        "codigo_barcode": "WH1-R1L2P03",
+        "observacoes": "Posição para pallets padrão, corredor 1"
+      },
+      "response": {
+        "uuid": "pos-uuid-001",
+        "codigo_posicao": "R1-L2-P03",
+        "codigo_deposito": "deposito-uuid-123",
+        "zona": "ZONA_A",
+        "rack": "RACK_01",
+        "nivel": 2,
+        "coluna": 3,
+        "tipo_posicao": "PALLET",
+        "capacidade_unidade": 1,
+        "capacidade_unidade_tipo": "PALLETS",
+        "dimensoes": {
+          "altura_mm": 1600,
+          "largura_mm": 1200,
+          "profundidade_mm": 800
+        },
+        "permite_mix": false,
+        "lot_required": false,
+        "serial_management": "NONE",
+        "control_temp": false,
+        "bloqueada": false,
+        "is_stock": false,
+        "inventario_ativo": false,
+        "status": "ATIVA",
+        "prioridade_putaway": 10,
+        "codigo_barcode": "WH1-R1L2P03",
+        "observacoes": "Posição para pallets padrão, corredor 1",
+        "created_at": "2025-11-30T10:00:00",
+        "updated_at": "2025-11-30T10:00:00",
+        "created_by": null,
+        "updated_by": null
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/wms/posicoes",
+      "summary": "Listar Posições",
+      "description": "Lista todas as posições com filtros opcionais",
+      "permissions": ["admin", "wms_manager", "user"],
+      "query_params": {
+        "codigo_deposito": "Código do depósito, ex: DEP1 (opcional) - NOTA: No input aceita código legível, mas retorna UUID",
+        "status": "ATIVA|INATIVA|BLOQUEADA|MANUTENCAO (opcional)",
+        "tipo_posicao": "PALLET|CAIXA|PRATELEIRA|PISO|BLOQUEIO (opcional)",
+        "bloqueada": "true|false (opcional)"
+      },
+      "response": [
+        {
+          "uuid": "pos-uuid-001",
+          "codigo_posicao": "R1-L2-P03",
+          "codigo_deposito": "deposito-uuid-123",
+          "zona": "ZONA_A",
+          "rack": "RACK_01",
+          "nivel": 2,
+          "coluna": 3,
+          "tipo_posicao": "PALLET",
+          "capacidade_unidade": 1,
+          "capacidade_unidade_tipo": "PALLETS",
+          "dimensoes": {
+            "altura_mm": 1600,
+            "largura_mm": 1200,
+            "profundidade_mm": 800
+          },
+          "permite_mix": false,
+          "lot_required": false,
+          "serial_management": "NONE",
+          "control_temp": false,
+          "bloqueada": false,
+          "is_stock": false,
+          "inventario_ativo": false,
+          "status": "ATIVA",
+          "prioridade_putaway": 10,
+          "codigo_barcode": "WH1-R1L2P03",
+          "observacoes": "Posição para pallets padrão, corredor 1",
+          "created_at": "2025-11-30T10:00:00",
+          "updated_at": "2025-11-30T10:00:00"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/wms/posicoes/{uuid}",
+      "summary": "Obter Posição",
+      "description": "Busca uma posição específica por UUID",
+      "permissions": ["admin", "wms_manager", "user"],
+      "path_params": {
+        "uuid": "UUID da posição"
+      },
+      "response": {
+        "uuid": "pos-uuid-001",
+        "codigo_posicao": "R1-L2-P03",
+        "codigo_deposito": "deposito-uuid-123",
+        "zona": "ZONA_A",
+        "rack": "RACK_01",
+        "nivel": 2,
+        "coluna": 3,
+        "tipo_posicao": "PALLET",
+        "capacidade_unidade": 1,
+        "capacidade_unidade_tipo": "PALLETS",
+        "dimensoes": {
+          "altura_mm": 1600,
+          "largura_mm": 1200,
+          "profundidade_mm": 800
+        },
+        "permite_mix": false,
+        "lot_required": false,
+        "serial_management": "NONE",
+        "control_temp": false,
+        "bloqueada": false,
+        "is_stock": false,
+        "inventario_ativo": false,
+        "status": "ATIVA",
+        "prioridade_putaway": 10,
+        "codigo_barcode": "WH1-R1L2P03",
+        "observacoes": "Posição para pallets padrão, corredor 1",
+        "created_at": "2025-11-30T10:00:00",
+        "updated_at": "2025-11-30T10:00:00"
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/wms/posicoes/{uuid}",
+      "summary": "Atualizar Posição",
+      "description": "Atualiza uma posição existente (campos opcionais)",
+      "permissions": ["admin", "wms_manager"],
+      "path_params": {
+        "uuid": "UUID da posição"
+      },
+      "request_body": {
+        "zona": "ZONA_B",
+        "status": "BLOQUEADA",
+        "observacoes": "Atualizado para manutenção"
+      },
+      "response": {
+        "uuid": "pos-uuid-001",
+        "codigo_posicao": "R1-L2-P03",
+        "codigo_deposito": "deposito-uuid-123",
+        "zona": "ZONA_B",
+        "rack": "RACK_01",
+        "nivel": 2,
+        "coluna": 3,
+        "tipo_posicao": "PALLET",
+        "capacidade_unidade": 1,
+        "capacidade_unidade_tipo": "PALLETS",
+        "dimensoes": {
+          "altura_mm": 1600,
+          "largura_mm": 1200,
+          "profundidade_mm": 800
+        },
+        "permite_mix": false,
+        "lot_required": false,
+        "serial_management": "NONE",
+        "control_temp": false,
+        "bloqueada": false,
+        "is_stock": false,
+        "inventario_ativo": false,
+        "status": "BLOQUEADA",
+        "prioridade_putaway": 10,
+        "codigo_barcode": "WH1-R1L2P03",
+        "observacoes": "Atualizado para manutenção",
+        "created_at": "2025-11-30T10:00:00",
+        "updated_at": "2025-11-30T10:05:00"
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/wms/posicoes/{uuid}",
+      "summary": "Deletar Posição",
+      "description": "Deleta uma posição (soft delete). REGRA: Não pode deletar se is_stock=true OU inventario_ativo=true",
+      "permissions": ["admin", "wms_manager"],
+      "path_params": {
+        "uuid": "UUID da posição"
+      },
+      "response": {
+        "message": "Posição deletada com sucesso"
+      },
+      "errors": [
+        {
+          "status_code": 400,
+          "detail": "Não é possível deletar uma posição com estoque (is_stock=true)."
+        },
+        {
+          "status_code": 400,
+          "detail": "Não é possível deletar uma posição com inventário ativo."
+        },
+        {
+          "status_code": 404,
+          "detail": "Posição não encontrada."
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/wms/posicoes/upload-csv",
+      "summary": "Upload em Massa (CSV)",
+      "description": "Upload em massa de posições via arquivo CSV com validação de campos",
+      "permissions": ["admin", "wms_manager"],
+      "content_type": "multipart/form-data",
+      "request_body": {
+        "file": "arquivo.csv (application/csv)"
+      },
+      "csv_format": {
+        "headers": "codigo_posicao,codigo_deposito,tipo_posicao,capacidade_unidade,capacidade_unidade_tipo,zona,rack,nivel,coluna,dimensoes_altura,dimensoes_largura,dimensoes_profundidade,permite_mix,lot_required,serial_management,control_temp,bloqueada,status,prioridade_putaway,codigo_barcode,observacoes",
+        "required_fields": ["codigo_posicao", "codigo_deposito", "tipo_posicao", "capacidade_unidade", "capacidade_unidade_tipo"],
+        "optional_fields": ["zona", "rack", "nivel", "coluna", "dimensoes_altura", "dimensoes_largura", "dimensoes_profundidade", "permite_mix", "lot_required", "serial_management", "control_temp", "bloqueada", "status", "prioridade_putaway", "codigo_barcode", "observacoes"],
+        "example_row": "R1-L2-P03,DEP1,PALLET,1,PALLETS,ZONA_A,RACK_01,2,3,1600,1200,800,false,false,NONE,false,false,ATIVA,10,WH1-R1L2P03,Posição padrão",
+        "note": "O campo 'codigo_deposito' deve usar o CÓDIGO LEGÍVEL do depósito (ex: DEP1, DEP2), não o UUID"
+      },
+      "response": {
+        "success": 45,
+        "errors": [
+          {
+            "row": 12,
+            "error": "Código de posição 'R1-L2-P05' já existe neste depósito.",
+            "data": {
+              "codigo_posicao": "R1-L2-P05",
+              "codigo_deposito": "DEP1"
+            }
+          },
+          {
+            "row": 23,
+            "error": "Campos obrigatórios faltando: tipo_posicao",
+            "data": {
+              "codigo_posicao": "R2-L1-P01"
+            }
+          }
+        ],
+        "total": 47
+      }
+    }
+  ],
+  "enums": {
+    "TipoPosicaoEnum": ["PALLET", "CAIXA", "PRATELEIRA", "PISO", "BLOQUEIO"],
+    "StatusPosicaoEnum": ["ATIVA", "INATIVA", "BLOQUEADA", "MANUTENCAO"],
+    "SerialManagementEnum": ["NONE", "BY_LOT", "BY_UNIT"],
+    "CapacidadeUnidadeTipoEnum": ["PALLETS", "CAIXAS", "UNIDADES", "KG"]
+  },
+  "business_rules": [
+    "Uma posição NÃO pode ser deletada se is_stock=true (há estoque na posição)",
+    "Uma posição NÃO pode ser deletada se inventario_ativo=true (há inventário em andamento)",
+    "O código da posição deve ser único dentro de cada depósito",
+    "A posição deve estar vinculada a um depósito existente",
+    "Upload CSV valida todos os campos antes de inserir e retorna relatório detalhado de sucessos e erros",
+    "IMPORTANTE: No input (request), o campo 'codigo_deposito' aceita o CÓDIGO LEGÍVEL do depósito (ex: 'DEP1'). O sistema busca automaticamente o UUID na tabela lynx_wms_depositos. Se não encontrar, retorna erro 404."
+  ],
+  "installation": {
+    "steps": [
+      "1. Execute o SQL: database/wms_position_schema.sql",
+      "2. Reinicie o backend para carregar o app",
+      "3. Ative o app via API: POST /api/v1/apps/wms-position/activate",
+      "4. Ou ative via DB: UPDATE lynx_apps SET enabled = 1 WHERE internal_code = 'wms-position';"
+    ]
+  }
+}

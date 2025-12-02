@@ -1,0 +1,525 @@
+{
+  "info": {
+    "title": "Material Group API",
+    "description": "Gestão de Grupos de Mercadoria, Categorias e Subcategorias.",
+    "version": "1.0.0",
+    "base_url": "http://localhost:8000/api/v1",
+    "route_prefix": "/configuracoes/material/grupos"
+  },
+  "routes": [
+    {
+      "path": "/configuracoes/material/grupos/groups",
+      "method": "POST",
+      "summary": "Criar Grupo",
+      "description": "Cria um novo grupo de mercadoria.",
+      "permissions": ["admin", "material_manager"],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MatGroupCreate"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Grupo criado",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MatGroupResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "path": "/configuracoes/material/grupos/groups",
+      "method": "GET",
+      "summary": "Listar Grupos",
+      "description": "Lista os grupos de mercadoria cadastrados.",
+      "permissions": ["admin", "material_manager", "user"],
+      "parameters": [
+        {
+          "name": "empresa_id",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Lista de grupos",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/MatGroupResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "path": "/configuracoes/material/grupos/groups/{uuid}",
+      "method": "GET",
+      "summary": "Obter Grupo",
+      "description": "Obtém detalhes de um grupo específico.",
+      "permissions": ["admin", "material_manager", "user"],
+      "parameters": [
+        {
+          "name": "uuid",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Detalhes do grupo",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MatGroupResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "path": "/configuracoes/material/grupos/groups/{uuid}",
+      "method": "PUT",
+      "summary": "Atualizar Grupo",
+      "description": "Atualiza descrição de um grupo.",
+      "permissions": ["admin", "material_manager"],
+      "parameters": [
+        {
+          "name": "uuid",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "description": { "type": "string" }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Grupo atualizado",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MatGroupResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "path": "/configuracoes/material/grupos/groups/{uuid}",
+      "method": "DELETE",
+      "summary": "Deletar Grupo",
+      "description": "Remove um grupo (soft delete).",
+      "permissions": ["admin", "material_manager"],
+      "parameters": [
+        {
+          "name": "uuid",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Grupo deletado"
+        }
+      }
+    },
+    {
+      "path": "/configuracoes/material/grupos/categories",
+      "method": "POST",
+      "summary": "Criar Categoria",
+      "description": "Cria uma nova categoria em um grupo.",
+      "permissions": ["admin", "material_manager"],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MatCategoryCreate"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Categoria criada",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MatCategoryResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "path": "/configuracoes/material/grupos/categories",
+      "method": "GET",
+      "summary": "Listar Categorias",
+      "description": "Lista categorias (opcionalmente filtradas por grupo).",
+      "permissions": ["admin", "material_manager", "user"],
+      "parameters": [
+        {
+          "name": "group_id",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Lista de categorias",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/MatCategoryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "path": "/configuracoes/material/grupos/categories/{uuid}",
+      "method": "GET",
+      "summary": "Obter Categoria",
+      "description": "Obtém detalhes de uma categoria.",
+      "permissions": ["admin", "material_manager", "user"],
+      "parameters": [
+        {
+          "name": "uuid",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Detalhes da categoria",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MatCategoryResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "path": "/configuracoes/material/grupos/categories/{uuid}",
+      "method": "PUT",
+      "summary": "Atualizar Categoria",
+      "description": "Atualiza descrição de uma categoria.",
+      "permissions": ["admin", "material_manager"],
+      "parameters": [
+        {
+          "name": "uuid",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "description": { "type": "string" }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Categoria atualizada",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MatCategoryResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "path": "/configuracoes/material/grupos/categories/{uuid}",
+      "method": "DELETE",
+      "summary": "Deletar Categoria",
+      "description": "Remove uma categoria (soft delete).",
+      "permissions": ["admin", "material_manager"],
+      "parameters": [
+        {
+          "name": "uuid",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Categoria deletada"
+        }
+      }
+    },
+    {
+      "path": "/configuracoes/material/grupos/subcategories",
+      "method": "POST",
+      "summary": "Criar Subcategoria",
+      "description": "Cria uma nova subcategoria.",
+      "permissions": ["admin", "material_manager"],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MatSubCategoryCreate"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Subcategoria criada",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MatSubCategoryResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "path": "/configuracoes/material/grupos/subcategories",
+      "method": "GET",
+      "summary": "Listar Subcategorias",
+      "description": "Lista subcategorias (opcionalmente filtradas por categoria).",
+      "permissions": ["admin", "material_manager", "user"],
+      "parameters": [
+        {
+          "name": "category_id",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Lista de subcategorias",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/MatSubCategoryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "path": "/configuracoes/material/grupos/subcategories/{uuid}",
+      "method": "GET",
+      "summary": "Obter Subcategoria",
+      "description": "Obtém detalhes de uma subcategoria.",
+      "permissions": ["admin", "material_manager", "user"],
+      "parameters": [
+        {
+          "name": "uuid",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Detalhes da subcategoria",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MatSubCategoryResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "path": "/configuracoes/material/grupos/subcategories/{uuid}",
+      "method": "PUT",
+      "summary": "Atualizar Subcategoria",
+      "description": "Atualiza descrição de uma subcategoria.",
+      "permissions": ["admin", "material_manager"],
+      "parameters": [
+        {
+          "name": "uuid",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "description": { "type": "string" }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Subcategoria atualizada",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MatSubCategoryResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "path": "/configuracoes/material/grupos/subcategories/{uuid}",
+      "method": "DELETE",
+      "summary": "Deletar Subcategoria",
+      "description": "Remove uma subcategoria (soft delete).",
+      "permissions": ["admin", "material_manager"],
+      "parameters": [
+        {
+          "name": "uuid",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Subcategoria deletada"
+        }
+      }
+    }
+  ],
+  "components": {
+    "schemas": {
+      "MatGroupCreate": {
+        "type": "object",
+        "properties": {
+          "code": {"type": "string"},
+          "description": {"type": "string"},
+          "empresa_id": {"type": "string"}
+        },
+        "required": ["code", "description", "empresa_id"]
+      },
+      "MatGroupResponse": {
+        "type": "object",
+        "properties": {
+          "uuid": {"type": "string"},
+          "code": {"type": "string"},
+          "description": {"type": "string"},
+          "created_at": {"type": "string", "format": "date-time"}
+        }
+      },
+      "MatCategoryCreate": {
+        "type": "object",
+        "properties": {
+          "code": {"type": "string"},
+          "description": {"type": "string"},
+          "group_id": {"type": "string"}
+        },
+        "required": ["code", "description", "group_id"]
+      },
+      "MatCategoryResponse": {
+        "type": "object",
+        "properties": {
+          "uuid": {"type": "string"},
+          "code": {"type": "string"},
+          "description": {"type": "string"},
+          "created_at": {"type": "string", "format": "date-time"}
+        }
+      },
+      "MatSubCategoryCreate": {
+        "type": "object",
+        "properties": {
+          "code": {"type": "string"},
+          "description": {"type": "string"},
+          "category_id": {"type": "string"}
+        },
+        "required": ["code", "description", "category_id"]
+      },
+      "MatSubCategoryResponse": {
+        "type": "object",
+        "properties": {
+          "uuid": {"type": "string"},
+          "code": {"type": "string"},
+          "description": {"type": "string"},
+          "created_at": {"type": "string", "format": "date-time"}
+        }
+      }
+    }
+  }
+}
