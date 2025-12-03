@@ -1,0 +1,582 @@
+{
+  "app": {
+    "internal_code": "supplier-001",
+    "name": "Fornecedores",
+    "version": "1.0.0",
+    "description": "Gestão completa de fornecedores com endereços e contatos",
+    "route_prefix": "/cadastro/fornecedores",
+    "module": "Cadastros",
+    "permissions": [
+      "master",
+      "admin",
+      "compras_manager"
+    ]
+  },
+  "important_notes": {
+    "centro": "CAMPO OBRIGATÓRIO! O usuário informa o código do centro (ex: 'CENTRO01') e o sistema busca automaticamente o UUID da empresa correspondente na tabela lynx_empresas. O fornecedor fica vinculado à empresa/centro informado.",
+    "codigo_interno": "O código interno é gerado automaticamente pelo sistema usando o range ZSUP. O range deve ser configurado antes de criar fornecedores (entre 1000000 e 9999999).",
+    "validacoes": "CPF é obrigatório para Pessoa Física e CNPJ para Pessoa Jurídica. Ambos são validados com dígitos verificadores.",
+    "chave_pix": "Se tipo_pagamento_favorito for PIX, a chave_pix é obrigatória. e vice versa para os outros tipos de pagamento.",
+    "enderecos": "Um fornecedor pode ter múltiplos endereços por tipo (FISCAL, ENTREGA, COBRANCA, OUTRO). Apenas um endereço pode ser marcado como padrão por tipo.",
+    "bloqueio": "Fornecedores bloqueados não podem ser usados em processos de compra."
+  },
+  "routes": [
+    {
+      "method": "POST",
+      "path": "/cadastro/fornecedores",
+      "summary": "Criar Fornecedor",
+      "description": "Cria um novo fornecedor com código gerado automaticamente pelo range ZSUP",
+      "permissions": [
+        "admin",
+        "compras_manager"
+      ],
+      "request_body": {
+        "centro": "CENTRO01",
+        "nome_fantasia": "Fornecedor ABC Ltda",
+        "razao_social": "ABC Comércio e Indústria Ltda",
+        "tipo_fornecedor": "PESSOA_JURIDICA",
+        "cnpj": "12.345.678/0001-90",
+        "inscricao_estadual": "123.456.789.012",
+        "inscricao_municipal": "98765",
+        "regime_tributario": "SIMPLES_NACIONAL",
+        "substituicao_tributaria": false,
+        "prazo_pagamento": 30,
+        "tipo_pagamento_favorito": "PIX",
+        "banco_nome": "Banco do Brasil",
+        "banco_agencia": "1234",
+        "banco_conta": "56789-0",
+        "banco_tipo_conta": "CORRENTE",
+        "chave_pix": "12345678000190",
+        "dia_fechamento_fatura": 25,
+        "dia_vencimento_fatura": 10,
+        "categoria_fornecedor": "MATERIA_PRIMA",
+        "classificacao_risco": "BAIXO",
+        "avaliacao": 5,
+        "observacoes_comerciais": "Fornecedor de confiança, entregas pontuais",
+        "principal_produto": "Matéria-prima plástica",
+        "marca_representacao": "Marca XYZ",
+        "tempo_medio_entrega": 7,
+        "confiabilidade_entrega": 95,
+        "qualidade_media": 90,
+        "reclamacoes": 0,
+        "ativo": true
+      },
+      "response": {
+        "uuid": "sup-uuid-001",
+        "codigo_interno": "1000001",
+        "centro": "CENTRO01",
+        "empresa_id": "empresa-uuid-123",
+        "nome_fantasia": "Fornecedor ABC Ltda",
+        "razao_social": "ABC Comércio e Indústria Ltda",
+        "tipo_fornecedor": "PESSOA_JURIDICA",
+        "cnpj": "12.345.678/0001-90",
+        "cpf": null,
+        "inscricao_estadual": "123.456.789.012",
+        "inscricao_municipal": "98765",
+        "regime_tributario": "SIMPLES_NACIONAL",
+        "substituicao_tributaria": false,
+        "prazo_pagamento": 30,
+        "tipo_pagamento_favorito": "PIX",
+        "banco_nome": "Banco do Brasil",
+        "banco_agencia": "1234",
+        "banco_conta": "56789-0",
+        "banco_tipo_conta": "CORRENTE",
+        "chave_pix": "12345678000190",
+        "dia_fechamento_fatura": 25,
+        "dia_vencimento_fatura": 10,
+        "categoria_fornecedor": "MATERIA_PRIMA",
+        "classificacao_risco": "BAIXO",
+        "avaliacao": 5,
+        "observacoes_comerciais": "Fornecedor de confiança, entregas pontuais",
+        "principal_produto": "Matéria-prima plástica",
+        "marca_representacao": "Marca XYZ",
+        "tempo_medio_entrega": 7,
+        "confiabilidade_entrega": 95,
+        "qualidade_media": 90,
+        "reclamacoes": 0,
+        "ativo": true,
+        "bloqueado": false,
+        "motivo_bloqueio": null,
+        "created_at": "2025-12-02T10:00:00",
+        "updated_at": "2025-12-02T10:00:00"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/cadastro/fornecedores",
+      "summary": "Listar Fornecedores",
+      "description": "Lista todos os fornecedores com filtros opcionais",
+      "permissions": [
+        "admin",
+        "compras_manager",
+        "user"
+      ],
+      "query_params": {
+        "ativo": "true|false (opcional)",
+        "tipo_fornecedor": "PESSOA_FISICA|PESSOA_JURIDICA (opcional)",
+        "categoria": "MATERIA_PRIMA|EMBALAGENS|SERVICOS|REVENDA|GERAL (opcional)",
+        "bloqueado": "true|false (opcional)",
+        "centro": "Código do centro/empresa (ex: CENTRO01) (opcional)"
+      },
+      "response": [
+        {
+          "uuid": "sup-uuid-001",
+          "codigo_interno": "1000001",
+          "nome_fantasia": "Fornecedor ABC Ltda",
+          "razao_social": "ABC Comércio e Indústria Ltda",
+          "tipo_fornecedor": "PESSOA_JURIDICA",
+          "ativo": true,
+          "bloqueado": false,
+          "created_at": "2025-12-02T10:00:00",
+          "updated_at": "2025-12-02T10:00:00"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/cadastro/fornecedores/{uuid}",
+      "summary": "Obter Fornecedor",
+      "description": "Busca um fornecedor específico por UUID",
+      "permissions": [
+        "admin",
+        "compras_manager",
+        "user"
+      ],
+      "path_params": {
+        "uuid": "UUID do fornecedor"
+      },
+      "response": {
+        "uuid": "sup-uuid-001",
+        "codigo_interno": "1000001",
+        "centro": "CENTRO01",
+        "empresa_id": "empresa-uuid-123",
+        "nome_fantasia": "Fornecedor ABC Ltda",
+        "razao_social": "ABC Comércio e Indústria Ltda",
+        "tipo_fornecedor": "PESSOA_JURIDICA",
+        "cnpj": "12.345.678/0001-90",
+        "ativo": true,
+        "bloqueado": false,
+        "created_at": "2025-12-02T10:00:00",
+        "updated_at": "2025-12-02T10:00:00"
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/cadastro/fornecedores/{uuid}",
+      "summary": "Atualizar Fornecedor",
+      "description": "Atualiza um fornecedor existente (todos os campos são opcionais)",
+      "permissions": [
+        "admin",
+        "compras_manager"
+      ],
+      "path_params": {
+        "uuid": "UUID do fornecedor"
+      },
+      "request_body": {
+        "nome_fantasia": "Fornecedor ABC Atualizado",
+        "avaliacao": 4,
+        "observacoes_comerciais": "Fornecedor com entregas atrasadas recentemente"
+      },
+      "response": {
+        "uuid": "sup-uuid-001",
+        "codigo_interno": "1000001",
+        "nome_fantasia": "Fornecedor ABC Atualizado",
+        "avaliacao": 4,
+        "updated_at": "2025-12-02T11:00:00"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/cadastro/fornecedores/{uuid}/bloquear",
+      "summary": "Bloquear Fornecedor",
+      "description": "Bloqueia um fornecedor informando o motivo. Fornecedores bloqueados não podem ser usados em compras.",
+      "permissions": [
+        "admin",
+        "compras_manager"
+      ],
+      "path_params": {
+        "uuid": "UUID do fornecedor"
+      },
+      "request_body": {
+        "motivo": "Inadimplência com fornecedor"
+      },
+      "response": {
+        "uuid": "sup-uuid-001",
+        "codigo_interno": "1000001",
+        "nome_fantasia": "Fornecedor ABC Ltda",
+        "bloqueado": true,
+        "motivo_bloqueio": "Inadimplência com fornecedor",
+        "updated_at": "2025-12-02T12:00:00"
+      },
+      "errors": [
+        {
+          "status_code": 400,
+          "detail": "Fornecedor já está bloqueado"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/cadastro/fornecedores/{uuid}/desbloquear",
+      "summary": "Desbloquear Fornecedor",
+      "description": "Desbloqueia um fornecedor previamente bloqueado",
+      "permissions": [
+        "admin",
+        "compras_manager"
+      ],
+      "path_params": {
+        "uuid": "UUID do fornecedor"
+      },
+      "response": {
+        "uuid": "sup-uuid-001",
+        "codigo_interno": "1000001",
+        "nome_fantasia": "Fornecedor ABC Ltda",
+        "bloqueado": false,
+        "motivo_bloqueio": null,
+        "updated_at": "2025-12-02T13:00:00"
+      },
+      "errors": [
+        {
+          "status_code": 400,
+          "detail": "Fornecedor não está bloqueado"
+        }
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/cadastro/fornecedores/{uuid}",
+      "summary": "Deletar Fornecedor",
+      "description": "Deleta um fornecedor (soft delete). O fornecedor é marcado como deletado e inativo.",
+      "permissions": [
+        "admin"
+      ],
+      "path_params": {
+        "uuid": "UUID do fornecedor"
+      },
+      "response": {
+        "message": "Fornecedor deletado com sucesso"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/cadastro/fornecedores/{fornecedor_uuid}/enderecos",
+      "summary": "Criar Endereço",
+      "description": "Cria um novo endereço para o fornecedor. Se marcado como padrão, outros endereços do mesmo tipo serão desmarcados.",
+      "permissions": [
+        "admin",
+        "compras_manager"
+      ],
+      "path_params": {
+        "fornecedor_uuid": "UUID do fornecedor"
+      },
+      "request_body": {
+        "tipo_endereco": "FISCAL",
+        "cep": "01310-100",
+        "logradouro": "Avenida Paulista",
+        "numero": "1578",
+        "complemento": "Andar 10",
+        "bairro": "Bela Vista",
+        "cidade": "São Paulo",
+        "estado": "SP",
+        "pais": "Brasil",
+        "padrao": true
+      },
+      "response": {
+        "uuid": "addr-uuid-001",
+        "fornecedor_uuid": "sup-uuid-001",
+        "tipo_endereco": "FISCAL",
+        "cep": "01310-100",
+        "logradouro": "Avenida Paulista",
+        "numero": "1578",
+        "complemento": "Andar 10",
+        "bairro": "Bela Vista",
+        "cidade": "São Paulo",
+        "estado": "SP",
+        "pais": "Brasil",
+        "padrao": true,
+        "created_at": "2025-12-02T10:00:00",
+        "updated_at": "2025-12-02T10:00:00"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/cadastro/fornecedores/{fornecedor_uuid}/enderecos",
+      "summary": "Listar Endereços",
+      "description": "Lista todos os endereços de um fornecedor",
+      "permissions": [
+        "admin",
+        "compras_manager",
+        "user"
+      ],
+      "path_params": {
+        "fornecedor_uuid": "UUID do fornecedor"
+      },
+      "query_params": {
+        "tipo_endereco": "FISCAL|ENTREGA|COBRANCA|OUTRO (opcional)"
+      },
+      "response": [
+        {
+          "uuid": "addr-uuid-001",
+          "fornecedor_uuid": "sup-uuid-001",
+          "tipo_endereco": "FISCAL",
+          "cep": "01310-100",
+          "logradouro": "Avenida Paulista",
+          "cidade": "São Paulo",
+          "estado": "SP",
+          "padrao": true
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/cadastro/fornecedores/enderecos/{uuid}",
+      "summary": "Obter Endereço",
+      "description": "Busca um endereço específico por UUID",
+      "permissions": [
+        "admin",
+        "compras_manager",
+        "user"
+      ],
+      "path_params": {
+        "uuid": "UUID do endereço"
+      },
+      "response": {
+        "uuid": "addr-uuid-001",
+        "fornecedor_uuid": "sup-uuid-001",
+        "tipo_endereco": "FISCAL",
+        "cep": "01310-100",
+        "cidade": "São Paulo"
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/cadastro/fornecedores/enderecos/{uuid}",
+      "summary": "Atualizar Endereço",
+      "description": "Atualiza um endereço existente",
+      "permissions": [
+        "admin",
+        "compras_manager"
+      ],
+      "path_params": {
+        "uuid": "UUID do endereço"
+      },
+      "request_body": {
+        "numero": "1580",
+        "complemento": "Andar 11"
+      },
+      "response": {
+        "uuid": "addr-uuid-001",
+        "numero": "1580",
+        "complemento": "Andar 11",
+        "updated_at": "2025-12-02T11:00:00"
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/cadastro/fornecedores/enderecos/{uuid}",
+      "summary": "Deletar Endereço",
+      "description": "Deleta um endereço (soft delete)",
+      "permissions": [
+        "admin",
+        "compras_manager"
+      ],
+      "path_params": {
+        "uuid": "UUID do endereço"
+      },
+      "response": {
+        "message": "Endereço deletado com sucesso"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/cadastro/fornecedores/{fornecedor_uuid}/contatos",
+      "summary": "Criar Contato",
+      "description": "Cria um novo contato para o fornecedor",
+      "permissions": [
+        "admin",
+        "compras_manager"
+      ],
+      "path_params": {
+        "fornecedor_uuid": "UUID do fornecedor"
+      },
+      "request_body": {
+        "nome": "João Silva",
+        "email": "joao.silva@fornecedor.com.br",
+        "telefone": "11987654321",
+        "celular": "11999887766",
+        "cargo": "Gerente Comercial",
+        "observacao": "Contato principal para negociações"
+      },
+      "response": {
+        "uuid": "contact-uuid-001",
+        "fornecedor_uuid": "sup-uuid-001",
+        "nome": "João Silva",
+        "email": "joao.silva@fornecedor.com.br",
+        "telefone": "11987654321",
+        "celular": "11999887766",
+        "cargo": "Gerente Comercial",
+        "observacao": "Contato principal para negociações",
+        "created_at": "2025-12-02T10:00:00",
+        "updated_at": "2025-12-02T10:00:00"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/cadastro/fornecedores/{fornecedor_uuid}/contatos",
+      "summary": "Listar Contatos",
+      "description": "Lista todos os contatos de um fornecedor",
+      "permissions": [
+        "admin",
+        "compras_manager",
+        "user"
+      ],
+      "path_params": {
+        "fornecedor_uuid": "UUID do fornecedor"
+      },
+      "response": [
+        {
+          "uuid": "contact-uuid-001",
+          "fornecedor_uuid": "sup-uuid-001",
+          "nome": "João Silva",
+          "email": "joao.silva@fornecedor.com.br",
+          "telefone": "11987654321",
+          "cargo": "Gerente Comercial"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/cadastro/fornecedores/contatos/{uuid}",
+      "summary": "Obter Contato",
+      "description": "Busca um contato específico por UUID",
+      "permissions": [
+        "admin",
+        "compras_manager",
+        "user"
+      ],
+      "path_params": {
+        "uuid": "UUID do contato"
+      },
+      "response": {
+        "uuid": "contact-uuid-001",
+        "nome": "João Silva",
+        "email": "joao.silva@fornecedor.com.br"
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/cadastro/fornecedores/contatos/{uuid}",
+      "summary": "Atualizar Contato",
+      "description": "Atualiza um contato existente",
+      "permissions": [
+        "admin",
+        "compras_manager"
+      ],
+      "path_params": {
+        "uuid": "UUID do contato"
+      },
+      "request_body": {
+        "cargo": "Diretor Comercial",
+        "observacao": "Promovido a diretor"
+      },
+      "response": {
+        "uuid": "contact-uuid-001",
+        "cargo": "Diretor Comercial",
+        "observacao": "Promovido a diretor",
+        "updated_at": "2025-12-02T11:00:00"
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/cadastro/fornecedores/contatos/{uuid}",
+      "summary": "Deletar Contato",
+      "description": "Deleta um contato (soft delete)",
+      "permissions": [
+        "admin",
+        "compras_manager"
+      ],
+      "path_params": {
+        "uuid": "UUID do contato"
+      },
+      "response": {
+        "message": "Contato deletado com sucesso"
+      }
+    }
+  ],
+  "enums": {
+    "TipoFornecedorEnum": [
+      "PESSOA_FISICA",
+      "PESSOA_JURIDICA"
+    ],
+    "RegimeTributarioEnum": [
+      "SIMPLES_NACIONAL",
+      "LUCRO_PRESUMIDO",
+      "LUCRO_REAL"
+    ],
+    "TipoPagamentoEnum": [
+      "PIX",
+      "TED",
+      "DOC",
+      "BOLETO",
+      "DINHEIRO"
+    ],
+    "TipoContaBancariaEnum": [
+      "CORRENTE",
+      "POUPANCA"
+    ],
+    "CategoriaFornecedorEnum": [
+      "MATERIA_PRIMA",
+      "EMBALAGENS",
+      "SERVICOS",
+      "REVENDA",
+      "GERAL"
+    ],
+    "ClassificacaoRiscoEnum": [
+      "BAIXO",
+      "MEDIO",
+      "ALTO"
+    ],
+    "TipoEnderecoEnum": [
+      "FISCAL",
+      "ENTREGA",
+      "COBRANCA",
+      "OUTRO"
+    ]
+  },
+  "business_rules": [
+    "O campo 'centro' é OBRIGATÓRIO. O usuário informa o código do centro (ex: 'CENTRO01') e o sistema busca o UUID da empresa na tabela lynx_empresas",
+    "O fornecedor fica vinculado à empresa/centro através do campo empresa_id",
+    "Se o centro informado não existir, retorna erro 404",
+    "O código interno é gerado automaticamente pelo range ZSUP (1000000 a 9999999)",
+    "CPF é obrigatório e validado para Pessoa Física",
+    "CNPJ é obrigatório e validado para Pessoa Jurídica",
+    "Razão social deve ser diferente do nome fantasia",
+    "Se tipo_pagamento_favorito = PIX, chave_pix é obrigatória",
+    "Avaliação deve estar entre 1 e 5",
+    "Confiabilidade de entrega e qualidade média devem estar entre 0 e 100",
+    "Dia de fechamento e vencimento de fatura devem estar entre 1 e 31",
+    "Um fornecedor pode ter múltiplos endereços por tipo",
+    "Apenas um endereço pode ser marcado como padrão por tipo",
+    "Ao marcar um endereço como padrão, outros do mesmo tipo são automaticamente desmarcados",
+    "Fornecedores bloqueados não podem ser usados em processos de compra",
+    "Ao bloquear um fornecedor, o motivo é obrigatório",
+    "CPF e CNPJ não podem ser duplicados no sistema",
+    "Telefones são automaticamente formatados (apenas números)",
+    "CEP deve ter 8 dígitos",
+    "Estado (UF) é automaticamente convertido para maiúsculo"
+  ],
+  "installation": {
+    "steps": [
+      "1. Execute o SQL: database/supplier_schema.sql (cria as 3 tabelas)",
+      "2. Execute o SQL: database/add_empresa_to_suppliers.sql (adiciona campo empresa_id)",
+      "3. Execute o SQL: database/supplier_module_seed.sql (configura módulo e range ZSUP)",
+      "4. Reinicie o backend para carregar o app",
+      "5. Ative o app via API: POST /api/v1/apps/supplier-001/activate",
+      "6. Ou ative via DB: UPDATE lynx_apps SET enabled = 1 WHERE internal_code = 'supplier-001';"
+    ]
+  },
+  "dependencies": {
+    "lynx_empresas": "OBRIGATÓRIO! O app depende da tabela lynx_empresas. O campo 'centro' informado pelo usuário é usado para buscar o UUID da empresa.",
+    "range_config": "O app depende do range ZSUP configurado na tabela lynx_range_configs. Se não existir, retornará erro 500 ao criar fornecedor."
+  }
+}
