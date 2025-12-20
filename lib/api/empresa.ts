@@ -35,7 +35,7 @@ export interface CreateEmpresaData {
   warehouse_number: string;
 }
 
-export interface UpdateEmpresaData extends Partial<CreateEmpresaData> {}
+export interface UpdateEmpresaData extends Partial<CreateEmpresaData> { }
 
 export interface CEPResponse {
   cep: string;
@@ -67,7 +67,9 @@ export class EmpresaAPI {
         throw new Error('Erro ao buscar empresas');
       }
 
-      return await response.json();
+      const data = await response.json();
+      console.log('EmpresaAPI.getEmpresas response:', data);
+      return data;
     } catch (error) {
       console.error('Error fetching empresas:', error);
       throw error;

@@ -1,0 +1,422 @@
+{
+  "app": {
+    "internal_code": "mat001",
+    "name": "Cadastro de Materiais",
+    "version": "1.0.0",
+    "description": "Gestão completa de materiais com integração WMS, Compras e Qualidade",
+    "route_prefix": "/mat001",
+    "module": "Cadastro",
+    "permissions": ["master", "admin"]
+  },
+  "important_notes": {
+    "centro": "CAMPO OBRIGATÓRIO! O usuário informa o código do centro (ex: '0001') e o sistema busca automaticamente o UUID da empresa correspondente na tabela lynx_empresas. O material fica vinculado à empresa/centro informado.",
+    "codigo_material": "O código do material NÃO pode ser alterado após a criação. Deve ser único no sistema.",
+    "ean_codes": "EAN1 e EAN2 devem ser únicos no sistema e não podem ser iguais entre si.",
+    "grupos_categorias": "No upload CSV, use códigos (codigo_grupo, codigo_categoria) ao invés de UUIDs. O sistema traduz automaticamente.",
+    "fornecedor": "No upload CSV, use codigo_interno do fornecedor. O sistema traduz para UUID automaticamente.",
+    "deposito_posicao": "No upload CSV, use codigo_deposito e codigo_posicao. Se informar posição, o depósito é obrigatório.",
+    "administrado_por_lote": "Se TRUE, o material não pode ter estoque negativo.",
+    "controle_qualidade": "Se TRUE, o material entra em status 'Em Inspeção' após recebimento.",
+    "material_inativo": "Material inativo não pode ser movimentado no sistema."
+  },
+  "routes": [
+    {
+      "method": "POST",
+      "path": "/mat001/material",
+      "summary": "Criar Material",
+      "description": "Cria um novo material com todas as sessões (Básica, Compras, Qualidade, Logística, Fiscal)",
+      "permissions": ["admin", "master"],
+      "request_body": {
+        "dados_basicos": {
+          "codigo_material": "MAT-001",
+          "descricao": "Produto Acabado Exemplo",
+          "unidade_medida_basica": "UN",
+          "tipo_material": "PRODUTO_ACABADO",
+          "grupo_uuid": "grupo-uuid-123",
+          "categoria_uuid": "categoria-uuid-456",
+          "subcategoria_uuid": "subcategoria-uuid-789",
+          "quantidade_base": 1.0,
+          "ean1": "7891234567890",
+          "ean2": null,
+          "administrado_por_lote": true,
+          "controle_qualidade": false,
+          "centro": "0001",
+          "empresa_id": "empresa-uuid-123",
+          "ativo": true
+        },
+        "dados_compras": {
+          "fornecedor_padrao_uuid": "fornecedor-uuid-123",
+          "codigo_material_fornecedor": "FORN-MAT-001",
+          "unidade_compra": "CX",
+          "multiplo_compra": 10.0,
+          "lead_time_dias": 15,
+          "lote_minimo_compra": 100.0,
+          "preco_base": 10.50,
+          "preco_venda": 25.00
+        },
+        "dados_qualidade": {
+          "classe_inspecao": "A",
+          "plano_inspecao": "PLAN-001",
+          "criticidade_material": "ALTA",
+          "exige_laudo_fornecedor": true,
+          "exige_lote_controle": true,
+          "data_validade": null
+        },
+        "dados_logistica": {
+          "deposito_padrao_uuid": "deposito-uuid-123",
+          "posicao_fixa_uuid": "posicao-uuid-456",
+          "estrategia_armazenagem": "FIFO",
+          "estrategia_picking": "ZONE_PICK"
+        },
+        "dados_fiscais": {
+          "ncm": "39269090",
+          "cest": "2100100",
+          "origem_produto": "NACIONAL",
+          "codigo_fiscal_interno": "FISC-001"
+        }
+      },
+      "response": {
+        "uuid": "material-uuid-001",
+        "codigo_material": "MAT-001",
+        "descricao": "Produto Acabado Exemplo",
+        "message": "Material criado com sucesso"
+      },
+      "errors": [
+        {
+          "status_code": 400,
+          "detail": "Código de material 'MAT-001' já existe no sistema"
+        },
+        {
+          "status_code": 400,
+          "detail": "EAN1 '7891234567890' já está em uso por outro material"
+        },
+        {
+          "status_code": 400,
+          "detail": "Centro não existe ou não pertence à empresa informada"
+        },
+        {
+          "status_code": 400,
+          "detail": "Grupo de material não existe"
+        },
+        {
+          "status_code": 400,
+          "detail": "Categoria não existe ou não pertence ao grupo informado"
+        }
+      ]
+    },
+    {
+      "method": "PUT",
+      "path": "/mat001/material/{codigo_material}",
+      "summary": "Atualizar Material",
+      "description": "Atualiza um material existente. Todos os campos são opcionais (update parcial). O código do material NÃO pode ser alterado.",
+      "permissions": ["admin", "master"],
+      "path_params": {
+        "codigo_material": "Código do material a ser atualizado"
+      },
+      "request_body": {
+        "dados_basicos": {
+          "descricao": "Produto Acabado Atualizado",
+          "ativo": false
+        },
+        "dados_compras": {
+          "preco_base": 12.00,
+          "preco_venda": 28.00
+        }
+      },
+      "response": {
+        "uuid": "material-uuid-001",
+        "codigo_material": "MAT-001",
+        "message": "Material atualizado com sucesso"
+      },
+      "errors": [
+        {
+          "status_code": 404,
+          "detail": "Material 'MAT-001' não encontrado"
+        },
+        {
+          "status_code": 400,
+          "detail": "Nenhum dado fornecido para atualização"
+        }
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/mat001/material/{codigo_material}",
+      "summary": "Excluir Material (Soft Delete)",
+      "description": "Exclui logicamente um material (soft delete). O material não é removido fisicamente do banco de dados.",
+      "permissions": ["admin", "master"],
+      "path_params": {
+        "codigo_material": "Código do material a ser excluído"
+      },
+      "response": {
+        "message": "Material 'MAT-001' excluído com sucesso"
+      },
+      "errors": [
+        {
+          "status_code": 404,
+          "detail": "Material 'MAT-001' não encontrado"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/mat001/material",
+      "summary": "Listar Materiais",
+      "description": "Lista todos os materiais com filtros opcionais e paginação",
+      "permissions": ["admin", "master"],
+      "query_params": {
+        "centro": "Código do centro (ex: '0001') - opcional",
+        "tipo_material": "PRODUTO_ACABADO|PRODUTO_SEMIACABADO|MATERIA_PRIMA|EMBALAGEM|ATIVO_IMOBILIZADO|MATERIAL_CONSUMO|SERVICO - opcional",
+        "grupo_uuid": "UUID do grupo - opcional",
+        "categoria_uuid": "UUID da categoria - opcional",
+        "subcategoria_uuid": "UUID da subcategoria - opcional",
+        "ativo": "true|false - opcional",
+        "limit": "Limite de registros (padrão: 100, max: 1000)",
+        "offset": "Offset para paginação (padrão: 0)"
+      },
+      "response": [
+        {
+          "uuid": "material-uuid-001",
+          "codigo_material": "MAT-001",
+          "descricao": "Produto Acabado Exemplo",
+          "unidade_medida_basica": "UN",
+          "tipo_material": "PRODUTO_ACABADO",
+          "centro": "0001",
+          "ativo": true,
+          "created_at": "2025-12-20T10:00:00",
+          "updated_at": "2025-12-20T10:00:00"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/mat001/material/upload",
+      "summary": "Upload em Massa de Materiais",
+      "description": "Upload em massa de materiais via arquivo CSV. IMPORTANTE: Use CÓDIGOS ao invés de UUIDs (codigo_grupo, codigo_categoria, codigo_fornecedor, etc). O sistema traduz automaticamente para UUIDs.",
+      "permissions": ["admin", "master"],
+      "content_type": "multipart/form-data",
+      "request_body": {
+        "file": "Arquivo CSV (campos obrigatórios: codigo_material, descricao, unidade_medida_basica, tipo_material, codigo_grupo, codigo_categoria, quantidade_base, centro)"
+      },
+      "csv_format": {
+        "required_fields": [
+          "codigo_material",
+          "descricao",
+          "unidade_medida_basica",
+          "tipo_material",
+          "codigo_grupo",
+          "codigo_categoria",
+          "quantidade_base",
+          "centro"
+        ],
+        "optional_fields": [
+          "codigo_subcategoria",
+          "ean1",
+          "ean2",
+          "administrado_por_lote (true/false)",
+          "controle_qualidade (true/false)",
+          "ativo (true/false)",
+          "codigo_fornecedor",
+          "codigo_material_fornecedor",
+          "unidade_compra",
+          "multiplo_compra",
+          "lead_time_dias",
+          "lote_minimo_compra",
+          "preco_base",
+          "preco_venda",
+          "codigo_deposito",
+          "codigo_posicao",
+          "estrategia_armazenagem",
+          "estrategia_picking",
+          "ncm",
+          "cest",
+          "origem_produto",
+          "codigo_fiscal_interno"
+        ],
+        "example_row": "MAT-001,Produto Exemplo,UN,PRODUTO_ACABADO,GRP001,CAT001,,1.0,7891234567890,,true,false,0001,1000001,DEP001,POS001,15.50,35.00,39269090,true"
+      },
+      "response": {
+        "total_processado": 5,
+        "sucessos": [
+          {
+            "linha": 2,
+            "codigo_material": "MAT-001",
+            "uuid": "material-uuid-001"
+          },
+          {
+            "linha": 3,
+            "codigo_material": "MAT-002",
+            "uuid": "material-uuid-002"
+          }
+        ],
+        "erros": [
+          {
+            "linha": 4,
+            "codigo_material": "MAT-003",
+            "erro": "Grupo 'GRP999' não encontrado"
+          }
+        ],
+        "message": "Processamento concluído: 2 sucessos, 1 erros"
+      },
+      "errors": [
+        {
+          "status_code": 400,
+          "detail": "Apenas arquivos CSV são aceitos"
+        }
+      ]
+    }
+  ],
+  "enums": {
+    "TipoMaterialEnum": [
+      "PRODUTO_ACABADO",
+      "PRODUTO_SEMIACABADO",
+      "MATERIA_PRIMA",
+      "EMBALAGEM",
+      "ATIVO_IMOBILIZADO",
+      "MATERIAL_CONSUMO",
+      "SERVICO"
+    ],
+    "CriticidadeMaterialEnum": [
+      "ALTA",
+      "MEDIA",
+      "BAIXA"
+    ],
+    "UnidadeMedidaExemplos": [
+      "UN - Unidade",
+      "CX - Caixa",
+      "KG - Quilograma",
+      "L - Litro",
+      "GL - Galão",
+      "PAR - Par",
+      "MT - Metro",
+      "M2 - Metro Quadrado",
+      "M3 - Metro Cúbico"
+    ]
+  },
+  "business_rules": [
+    "O campo 'centro' é OBRIGATÓRIO. O usuário informa o código do centro (ex: '0001') e o sistema busca o UUID da empresa na tabela lynx_empresas",
+    "O material fica vinculado à empresa/centro através do campo empresa_id",
+    "Se o centro informado não existir, retorna erro 400",
+    "Código do material não pode ser alterado após criação",
+    "Código do material deve ser único no sistema",
+    "EAN1 e EAN2 não podem ser iguais entre si",
+    "EAN1 e EAN2 devem ser únicos no sistema (não podem repetir em outros materiais)",
+    "Quantidade base deve ser maior que 0",
+    "Grupo de material deve existir",
+    "Categoria deve existir e pertencer ao grupo informado",
+    "Subcategoria deve existir e pertencer à categoria informada (se informada)",
+    "Se administrado_por_lote = TRUE, não permitir estoque negativo",
+    "Se controle_qualidade = TRUE, material entra em status 'Em Inspeção'",
+    "Fornecedor padrão deve existir (se informado)",
+    "Depósito padrão deve existir (se informado)",
+    "Se posição fixa for informada, depósito padrão DEVE estar preenchido",
+    "Posição deve existir e pertencer ao depósito informado",
+    "Material inativo não pode ser movimentado",
+    "Todas as alterações geram log de auditoria",
+    "Exclusão é sempre lógica (soft delete)",
+    "Materiais do tipo SERVICO não têm controle físico de estoque"
+  ],
+  "upload_csv_rules": [
+    "Use CÓDIGOS ao invés de UUIDs para facilitar o upload",
+    "codigo_grupo: use o 'code' da tabela lynx_mat_groups",
+    "codigo_categoria: use o 'code' da tabela lynx_mat_categories",
+    "codigo_subcategoria: use o 'code' da tabela lynx_mat_subcategories (opcional)",
+    "centro: use o 'centro' da tabela lynx_empresas",
+    "codigo_fornecedor: use o 'codigo_interno' da tabela lynx_suppliers (opcional)",
+    "codigo_deposito: use o 'codigo_deposito' da tabela lynx_wms_depositos (opcional)",
+    "codigo_posicao: use o 'codigo_posicao' da tabela lynx_wms_posicoes (opcional)",
+    "administrado_por_lote, controle_qualidade, ativo: use 'true' ou 'false'",
+    "O sistema valida linha a linha e retorna relatório detalhado",
+    "Processamento é transacional: se uma linha falhar, apenas ela é rejeitada",
+    "Upload suporta todas as sessões: Básica, Compras, Logística e Fiscal"
+  ],
+  "data_structure": {
+    "sessions": {
+      "dados_basicos": {
+        "description": "Sessão OBRIGATÓRIA com dados essenciais do material",
+        "required": true,
+        "fields": [
+          "codigo_material",
+          "descricao",
+          "unidade_medida_basica",
+          "tipo_material",
+          "grupo_uuid",
+          "categoria_uuid",
+          "quantidade_base",
+          "centro",
+          "empresa_id"
+        ]
+      },
+      "dados_compras": {
+        "description": "Sessão OPCIONAL com dados de compras",
+        "required": false,
+        "fields": [
+          "fornecedor_padrao_uuid",
+          "codigo_material_fornecedor",
+          "unidade_compra",
+          "multiplo_compra",
+          "lead_time_dias",
+          "lote_minimo_compra",
+          "preco_base",
+          "preco_venda"
+        ]
+      },
+      "dados_qualidade": {
+        "description": "Sessão OPCIONAL com dados de qualidade",
+        "required": false,
+        "fields": [
+          "classe_inspecao",
+          "plano_inspecao",
+          "criticidade_material",
+          "exige_laudo_fornecedor",
+          "exige_lote_controle",
+          "data_validade"
+        ]
+      },
+      "dados_logistica": {
+        "description": "Sessão OPCIONAL com dados de logística/WMS",
+        "required": false,
+        "fields": [
+          "deposito_padrao_uuid",
+          "posicao_fixa_uuid",
+          "estrategia_armazenagem",
+          "estrategia_picking"
+        ]
+      },
+      "dados_fiscais": {
+        "description": "Sessão OPCIONAL com dados fiscais",
+        "required": false,
+        "fields": [
+          "ncm",
+          "cest",
+          "origem_produto",
+          "codigo_fiscal_interno"
+        ]
+      }
+    }
+  },
+  "installation": {
+    "steps": [
+      "1. Execute o SQL: database/material_schema.sql (cria a tabela lynx_materiais)",
+      "2. Execute o SQL: database/mat001_module_insert.sql (configura módulo)",
+      "3. Reinicie o backend para carregar o app",
+      "4. Ative o app via API: POST /api/v1/apps/mat001/activate",
+      "5. Ou ative via DB: UPDATE lynx_apps SET enabled = 1 WHERE internal_code = 'mat001';"
+    ]
+  },
+  "dependencies": {
+    "lynx_empresas": "OBRIGATÓRIO! O app depende da tabela lynx_empresas. O campo 'centro' informado pelo usuário é usado para buscar o UUID da empresa.",
+    "lynx_mat_groups": "OBRIGATÓRIO! O app depende da tabela lynx_mat_groups para grupos de materiais.",
+    "lynx_mat_categories": "OBRIGATÓRIO! O app depende da tabela lynx_mat_categories para categorias.",
+    "lynx_mat_subcategories": "OPCIONAL. Tabela de subcategorias de materiais.",
+    "lynx_suppliers": "OPCIONAL. Usado para vincular fornecedor padrão.",
+    "lynx_wms_depositos": "OPCIONAL. Usado para vincular depósito padrão.",
+    "lynx_wms_posicoes": "OPCIONAL. Usado para vincular posição fixa de armazenamento."
+  },
+  "integrations": {
+    "wms": "Integração com módulo WMS para depósitos e posições de armazenamento",
+    "compras": "Integração com módulo de Compras através do fornecedor padrão",
+    "qualidade": "Integração com módulo de Qualidade através dos controles de inspeção",
+    "fiscal": "Dados fiscais (NCM, CEST) para integração com módulo Fiscal/NF-e"
+  }
+}
